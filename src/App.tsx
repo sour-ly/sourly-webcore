@@ -1,4 +1,4 @@
-import { MemoryRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.scss';
 import React, { useEffect, useRef, useState } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -31,7 +31,6 @@ import { Authentication } from './api/auth';
 import { APIMethods } from './api/api';
 import { Signup } from './views/Signup';
 import UserSearch from './views/UserSearch';
-import IPC from './ReactIPC';
 
 export type WindowContextType = {
 	popUp: WindowPopUp;
@@ -101,7 +100,7 @@ export default function App({ flags }: { flags: number }) {
 	/* main init function for the application */
 	useEffect(() => {
 
-		/* Deeplink listener */
+		/* Deeplink listener 
 		IPC.on('deeplink', (e) => {
 			if (e.func === 'login') {
 				if (e.token && e.refresh_token && e.user_id) {
@@ -119,6 +118,7 @@ export default function App({ flags }: { flags: number }) {
 				}
 			}
 		});
+		*/
 
 		/* grab the user's login data */
 		APIMethods.getLoginState().then(async (login) => {
@@ -138,7 +138,6 @@ export default function App({ flags }: { flags: number }) {
 			}
 		});
 
-		setLoading(false);
 
 		/* simply call the adjustTheme function */
 		adjustTheme();

@@ -1,8 +1,6 @@
 import App from './App';
-import IPC from './ReactIPC';
-import { Log } from './log/log';
 import { createWaitFunction } from './util/promise';
-import { Profile } from './object/Profile';
+import { Profile, ProfileProps } from './object/Profile';
 import SettingsObject, { Settings } from './settings/settings';
 import { IStorage } from './interface/istorage';
 
@@ -25,6 +23,7 @@ export let environment: EnvironmentVariables = {
 export var profileobj: Profile;
 export var sourlysettings: Settings;
 export var storage: IStorage;
+export var endpoint: string;
 
 export function setProfile(p: Profile) {
 	profileobj = p;
@@ -41,20 +40,22 @@ export enum SourlyFlags {
 
 //this is going to be the main entry point for the app, this is really important in how the app is going to be structured regardless of the platform; this will allow us to interface with the main process and the renderer process
 interface AppProps {
-	getProfile: () => Promise<Profile>;
+	getProfile: () => Promise<ProfileProps>;
 	getSettings: () => Promise<Settings>;
 	getFlags: () => Promise<number>;
 	setFlags: (flags: number) => Promise<void>;
 	systems: {
 		storage: IStorage;
 	}
+	apiEndpoint: string;
 }
-async function AppInit({ getProfile, getSettings, getFlags, setFlags, systems }: AppProps) {
+async function AppInit({ getProfile, getSettings, getFlags, setFlags, systems, apiEndpoint }: AppProps) {
 	return await createWaitFunction(
-		new Promise((resolve) => {
+		new Promise(async (resolve) => {
 			storage = systems.storage;
+			sourlysettings = new SettingsObject(await getSettings());
 			profileobj = new Profile();
-			sourlysettings = new SettingsObject();
+			endpoint = apiEndpoint;
 
 			resolve(null);
 		}),

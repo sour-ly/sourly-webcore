@@ -1,25 +1,27 @@
 {
-  "name": "sourly-webcore",
-  "version": "1.0.0",
-  "description": "Sourly Webcore for electron + webframe work ",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@react-oauth/google": "^0.12.1",
-    "js-confetti": "^0.12.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-router-dom": "^7.0.2",
-    "sass": "^1.82.0",
-    "typescript": "^5.7.2"
-  },
-  "devDependencies": {
-    "@types/node": "^22.10.2",
-    "@types/react-dom": "^19.0.2",
-    "sass-embedded": "^1.82.0"
-  }
+	"name": "sourly-webcore",
+	"version": "1.0.0",
+	"description": "Sourly Webcore for electron + webframe work ",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {},
+	"peerDependencies": {
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1",
+		"react-router-dom": "^6.16.0",
+		"@react-oauth/google": "^0.12.1",
+		"js-confetti": "^0.12.0",
+		"sass": "^1.82.0",
+		"typescript": "^5.7.2"
+	},
+	"devDependencies": {
+		"@types/node": "^22.10.2",
+		"@types/react": "^18.2.21",
+		"@types/react-dom": "^18.2.7",
+		"sass-embedded": "^1.82.0"
+	}
 }

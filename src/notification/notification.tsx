@@ -113,7 +113,7 @@ function NotificationBanner({
 		};
 	}, [notification.state]);
 
-	if (!settings.notification.enabled) {
+	if (settings.notification && !settings.notification.enabled) {
 		return null;
 	}
 

@@ -3,6 +3,7 @@ import { Log } from '../log/log';
 import { RemoveNANFromObject } from '../input/filter';
 import IPC from '../ReactIPC';
 import { adjustTheme } from '../util/darkmode';
+import { storage } from '..';
 type StringfulObject = { [key: string]: any };
 
 export interface Settings extends StringfulObject {
@@ -37,8 +38,11 @@ class SettingsObject
 
 	constructor(props: Omit<Settings, 'save'> = sDefault) {
 		super();
-		this.notification = props.notification;
-		this.theme = props.theme;
+		this.notification = props?.notification ?? {
+			enabled: true,
+			duration: 5000,
+		};
+		this.theme = props?.theme ?? 'dark';
 	}
 
 	public set<T extends keyof SettingsObject>(
@@ -76,7 +80,7 @@ class SettingsObject
 
 	public save() {
 		this.emit('onUpdate', this);
-		IPC.sendMessage('storage-save', { key: 'settings', value: this.toJSON() });
+		storage.save('settings', this.toJSON());
 		Log.log('settings:save', 0, 'saved settings to storage', this.toJSON());
 	}
 

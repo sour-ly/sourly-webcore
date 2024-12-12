@@ -1,10 +1,9 @@
 import { Log } from '../log/log';
-import { environment, storage } from '../index';
+import { endpoint, environment, storage } from '../index';
 import { GoalProps } from '../object/Goal';
 import { Profile, ProfileProps } from '../object/Profile';
 import Skill, { SkillManager, SkillProps } from '../object/Skill';
 import { profileobj, SourlyFlags } from '../index';
-import IPC from '../ReactIPC';
 import Queue from '../util/queue';
 import { Stateful } from '../util/state';
 import { Authentication, LoginState } from './auth';
@@ -76,7 +75,7 @@ export namespace APITypes {
 }
 
 export namespace API {
-	const BASE_URL = '';
+	const BASE_URL = "http://localhost:3000/api/v1/";
 
 	const headers = {
 		'Content-Type': 'application/json',
@@ -231,28 +230,26 @@ namespace Offline {
 	};
 
 	export async function getLoginState(): Promise<LoginState> {
-		return new Promise((resolve) => {
-			IPC.once('storage-request', (...arg) => {
-				const [data] = arg;
-				if (!data || Object.keys(data).length === 0) {
-					Log.log('storage:request', 1, 'got a bad packet', data);
-				} else {
-					try {
-						const json = data as any;
-						resolve(json as LoginState);
-					} catch (e) {
-						Log.log(
-							'storage:request',
-							1,
-							'failed to load login state from storage with error %s',
-							e,
-							data,
-						);
-					}
+		return new Promise(async (resolve) => {
+			const arg = await storage.get('login');
+			const data = arg;
+			if (!data || Object.keys(data).length === 0) {
+				Log.log('storage:request', 1, 'got a bad packet', data);
+			} else {
+				try {
+					const json = data as any;
+					resolve(json as LoginState);
+				} catch (e) {
+					Log.log(
+						'storage:request',
+						1,
+						'failed to load login state from storage with error %s',
+						e,
+						data,
+					);
 				}
-				resolve({ null: true, username: '', offline: true });
-			});
-			IPC.sendMessage('storage-request', { key: 'login', value: '' });
+			}
+			resolve({ null: true, username: '', offline: true });
 		});
 	}
 
@@ -260,10 +257,10 @@ namespace Offline {
 		{ profileobj, flags }: GetSkillProps,
 		callback: () => void = () => { },
 	): Promise<Profile> {
-		return new Promise((resolve) => {
-			const arg = storage.get('storage-request')
+		return new Promise(async (resolve) => {
+			const arg = await storage.get('profile')
 			// handle profile stuff
-			const [data] = arg;
+			const data = arg;
 			if (!data || Object.keys(data).length === 0) {
 				Log.log('storage:request', 1, 'got a bad packet', data);
 			} else {
@@ -310,67 +307,65 @@ namespace Offline {
 		flags,
 	}: GetSkillProps): Promise<void> {
 		return new Promise(async (resolve) => {
-			IPC.once('storage-request', (...arg) => {
-				const [data] = arg;
-				let new_profile_flag = false;
+			const arg = await storage.get('skill')
+			const data = arg;
+			let new_profile_flag = false;
 
-				if (!profileobj.state || !(profileobj.state instanceof Profile)) {
+			if (!profileobj.state || !(profileobj.state instanceof Profile)) {
+				Log.log(
+					'storage:request',
+					1,
+					'no profile object to load into, for now we will just create a new one but later we will need to handle this better',
+				);
+				profileobj.setState(new Profile());
+				new_profile_flag = true;
+				flags |= SourlyFlags.NEW_PROFILE;
+			} else {
+				flags |= profileobj.state.Flags;
+			}
+
+			if (!profileobj.state || profileobj.state.Flags & SourlyFlags.IGNORE) {
+				throw new Error('profile object is still undefined');
+			}
+
+			if (!data || Object.keys(data).length === 0) {
+				Log.log('storage:request', 1, 'got a bad packet or no skills', data);
+				flags |= SourlyFlags.NO_SKILLS;
+				resolve(undefined);
+			} else if (Array.isArray(data)) {
+				try {
+					for (const skill of data) {
+						profileobj.state.addSkillFromJSON(skill);
+					}
+					Log.log('storage:request', 0, 'loaded skills from storage', data);
+				} catch (e) {
 					Log.log(
 						'storage:request',
 						1,
-						'no profile object to load into, for now we will just create a new one but later we will need to handle this better',
+						'failed to load skills from storage',
+						data,
+						e,
 					);
-					profileobj.setState(new Profile());
-					new_profile_flag = true;
-					flags |= SourlyFlags.NEW_PROFILE;
-				} else {
-					flags |= profileobj.state.Flags;
 				}
-
-				if (!profileobj.state || profileobj.state.Flags & SourlyFlags.IGNORE) {
-					throw new Error('profile object is still undefined');
-				}
-
-				if (!data || Object.keys(data).length === 0) {
-					Log.log('storage:request', 1, 'got a bad packet or no skills', data);
-					flags |= SourlyFlags.NO_SKILLS;
-					resolve(undefined);
-				} else if (Array.isArray(data)) {
-					try {
-						for (const skill of data) {
-							profileobj.state.addSkillFromJSON(skill);
-						}
-						Log.log('storage:request', 0, 'loaded skills from storage', data);
-					} catch (e) {
-						Log.log(
-							'storage:request',
-							1,
-							'failed to load skills from storage',
-							data,
-							e,
-						);
-					}
-				}
-				if (new_profile_flag) {
-					Log.log(
-						'storage:request',
-						0,
-						'new profile object created, adjusting to skills',
-					);
-					profileobj.state.adjustProfileToSkills();
-				}
-				resolve(undefined);
-			});
-			IPC.sendMessage('storage-request', { key: 'skill', value: '' });
+			}
+			if (new_profile_flag) {
+				Log.log(
+					'storage:request',
+					0,
+					'new profile object created, adjusting to skills',
+				);
+				profileobj.state.adjustProfileToSkills();
+			}
+			resolve(undefined);
 		});
 	}
 
 	export async function saveSkillsOffline(skills: object): Promise<void> {
-		IPC.sendMessage('storage-save', { key: 'skill', value: skills });
+		storage.save('skill', skills);
 	}
 
 	export async function saveProfileOffline(profile: object): Promise<void> {
-		IPC.sendMessage('storage-save', { key: 'profile', value: profile });
+		storage.save('profile', profile);
 	}
 }
 
@@ -706,7 +701,7 @@ export namespace APIMethods {
 		if (Authentication.getOfflineMode()) {
 			return;
 		}
-		return Online.refreshToken();
+		return await Online.refreshToken();
 	}
 
 	export async function addGoal(skill_id: number, goalProps: GoalProps) {

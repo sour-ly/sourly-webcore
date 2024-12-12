@@ -3,7 +3,6 @@ import { Authentication } from '../api/auth';
 import { Absorbable, Eventful, Listener } from '../event/events';
 import Identifiable from '../id/id';
 import { Log } from '../log/log';
-import IPC from '../ReactIPC';
 import Goal, { GoalEventMap, GoalProps } from './Goal';
 
 export type Metric =

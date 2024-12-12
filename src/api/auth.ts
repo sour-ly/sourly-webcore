@@ -1,8 +1,7 @@
 import { Eventful } from '../event/events';
 import { Log } from '../log/log';
 import { Profile } from '../object/Profile';
-import { profileobj, setProfile } from '../';
-import IPC from '../ReactIPC';
+import { profileobj, setProfile, storage } from '../';
 import { ReactlessState, Stateful } from '../util/state';
 import { API, APIMethods, APITypes } from './api';
 
@@ -65,13 +64,10 @@ export namespace Authentication {
 						callback({ loginState: state });
 					}, false);
 				}
-				IPC.sendMessage('storage-save', { key: 'login', value: state });
+				storage.save('login', state);
 			});
 			this.on('logout', () => {
-				IPC.sendMessage('storage-save', {
-					key: 'login',
-					value: { null: true, offline: false, username: '' },
-				});
+				storage.save('login', { null: true, offline: false, username: '' });
 			});
 		}
 
@@ -139,7 +135,6 @@ export namespace Authentication {
 
 	// expose the auth cookies
 	export const authCookies = () => {
-		console.log(loginState.state());
 		document.cookie = '';
 		if (loginState.state().accessToken) {
 			setCookie('access_token', loginState.state()?.accessToken ?? '', 3600);

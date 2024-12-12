@@ -2,7 +2,6 @@ import { APIMethods } from '../api/api';
 import { Authentication } from '../api/auth';
 import { Log } from '../log/log';
 import { profileobj, SourlyFlags } from '../';
-import IPC from '../ReactIPC';
 import Goal, { GoalProps } from './Goal';
 import Skill, { SkillContainer, SkillEventMap, SkillProps } from './Skill';
 
