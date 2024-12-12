@@ -1,5 +1,5 @@
 import { Log } from '../log/log';
-import { environment } from '../index';
+import { environment, storage } from '../index';
 import { GoalProps } from '../object/Goal';
 import { Profile, ProfileProps } from '../object/Profile';
 import Skill, { SkillManager, SkillProps } from '../object/Skill';
@@ -261,49 +261,47 @@ namespace Offline {
 		callback: () => void = () => { },
 	): Promise<Profile> {
 		return new Promise((resolve) => {
-			IPC.once('storage-request', (...arg) => {
-				// handle profile stuff
-				const [data] = arg;
-				if (!data || Object.keys(data).length === 0) {
-					Log.log('storage:request', 1, 'got a bad packet', data);
-				} else {
-					try {
-						const json = data as any;
-						const npfp = new Profile(
-							json.name,
-							json.level,
-							json.currentExperience,
-							[],
-							json.version ?? '0.0.0',
-							json.flags ?? SourlyFlags.NULL,
-						);
-						if (!profileobj.state) {
-							profileobj.setState(npfp);
-						} else {
-							profileobj.state.NameEventless = npfp.Name;
-							profileobj.state.Level = npfp.Level;
-							profileobj.state.CurrentExperience = npfp.CurrentExperience;
-							profileobj.state.VersionEventless = npfp.Version;
-							profileobj.state.FlagsEventless = npfp.Flags;
-							profileobj.state.Skills = npfp.Skills;
+			const arg = storage.get('storage-request')
+			// handle profile stuff
+			const [data] = arg;
+			if (!data || Object.keys(data).length === 0) {
+				Log.log('storage:request', 1, 'got a bad packet', data);
+			} else {
+				try {
+					const json = data as any;
+					const npfp = new Profile(
+						json.name,
+						json.level,
+						json.currentExperience,
+						[],
+						json.version ?? '0.0.0',
+						json.flags ?? SourlyFlags.NULL,
+					);
+					if (!profileobj.state) {
+						profileobj.setState(npfp);
+					} else {
+						profileobj.state.NameEventless = npfp.Name;
+						profileobj.state.Level = npfp.Level;
+						profileobj.state.CurrentExperience = npfp.CurrentExperience;
+						profileobj.state.VersionEventless = npfp.Version;
+						profileobj.state.FlagsEventless = npfp.Flags;
+						profileobj.state.Skills = npfp.Skills;
 
-						}
-						Log.log('storage:request', 0, 'loaded profile from storage', data);
-						resolve(profileobj.state as Profile);
-						return;
-					} catch (e) {
-						Log.log(
-							'storage:request',
-							1,
-							'failed to load profile from storage with error %s',
-							e,
-							data,
-						);
 					}
+					Log.log('storage:request', 0, 'loaded profile from storage', data);
+					resolve(profileobj.state as Profile);
+					return;
+				} catch (e) {
+					Log.log(
+						'storage:request',
+						1,
+						'failed to load profile from storage with error %s',
+						e,
+						data,
+					);
 				}
-				resolve(profileobj.state as Profile);
-			});
-			IPC.sendMessage('storage-request', { key: 'profile', value: '' });
+			}
+			resolve(profileobj.state as Profile);
 		});
 	}
 
