@@ -2,14 +2,12 @@ import '../styles/profile/profiledetailcard.scss';
 import ProgressBar from '../ProgressBar';
 import { Profile, ProfileSkeleton } from '../../object/Profile';
 //import pfpimage from '../../../../assets/ui/pfp.jpg';
-//import Pencil from '../../../../assets/ui/pencil.svg';
 import { EditUsernameWrapper } from '../../model/popup/ProfilePopup';
-import { profileobj } from '../..';
+import { assets, profileobj } from '../..';
 
-const pfpimage = 'https://cdn.jsdelivr.net/gh/roderickvella/hosting/assets/ui/pfp.jpg';
-const Pencil = 'https://cdn.jsdelivr.net/gh/roderickvella/hosting/assets/ui/pencil.svg';
 
 function ProfilePicture() {
+	const pfpimage = assets.getAsset('ui/pfp');
 	return (
 		<div className="profile-picture">
 			<img src={pfpimage} alt="profile picture" />

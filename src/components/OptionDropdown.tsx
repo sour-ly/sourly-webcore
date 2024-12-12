@@ -2,8 +2,8 @@ import './styles/optiondropdown.scss';
 import React, { useEffect } from 'react';
 //import dots from '../../../assets/ui/dots.svg';
 import { absorb } from '../util/click';
+import { assets } from '..';
 
-const dots = 'https://cdn.jsdelivr.net/gh/roderickvella/hosting/assets/ui/dots.svg';
 
 // avoid using this for stateful components
 export type OptionPreferred = {
@@ -32,6 +32,7 @@ export default function OptionDropdown({
 	const ref = React.createRef<HTMLDivElement>();
 	const [open, setOpen] = React.useState(false);
 	const [optionsState, setOptions] = React.useState<Options>(options);
+	const dots = assets.getAsset('ui/dots');
 
 	useEffect(() => {
 		const f = (e: MouseEvent) => {

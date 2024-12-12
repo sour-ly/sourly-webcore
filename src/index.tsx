@@ -3,6 +3,7 @@ import { createWaitFunction } from './util/promise';
 import { Profile, ProfileProps } from './object/Profile';
 import SettingsObject, { Settings } from './settings/settings';
 import { IStorage } from './interface/istorage';
+import IAsset from './interface/iasset';
 
 type EnvironmentVariables = {
 	version: string;
@@ -24,6 +25,9 @@ export var profileobj: Profile;
 export var sourlysettings: Settings;
 export var storage: IStorage;
 export var endpoint: string;
+export var assets: IAsset = {
+	getAsset: (asset: string) => '',
+};
 
 export function setProfile(p: Profile) {
 	profileobj = p;
@@ -46,6 +50,7 @@ interface AppProps {
 	setFlags: (flags: number) => Promise<void>;
 	systems: {
 		storage: IStorage;
+		asset: IAsset;
 	}
 	apiEndpoint: string;
 }
@@ -53,9 +58,11 @@ async function AppInit({ getProfile, getSettings, getFlags, setFlags, systems, a
 	return await createWaitFunction(
 		new Promise(async (resolve) => {
 			storage = systems.storage;
+			assets = systems.asset;
 			sourlysettings = new SettingsObject(await getSettings());
 			profileobj = new Profile();
 			endpoint = apiEndpoint;
+
 
 			resolve(null);
 		}),
@@ -63,6 +70,10 @@ async function AppInit({ getProfile, getSettings, getFlags, setFlags, systems, a
 			if (!environment) {
 				// Handle the case where environment might not be ready
 				throw new Error('Environment is not initialized');
+			}
+
+			if (!assets) {
+				throw new Error('Assets are not initialized');
 			}
 			return App;
 		},

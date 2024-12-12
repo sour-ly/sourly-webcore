@@ -11,11 +11,10 @@ import { useWindow } from '../../App';
 import { useStateUtil } from '../../util/state';
 import Input from '../../components/Input';
 import { ButtonProps } from '../../popup/Popup';
-import { profileobj } from '../..';
+import { assets, profileobj } from '../..';
 import { WelcomePageSlideTwoContext } from '../../messagescreen/pages/WelcomePage';
 import { Button } from '../../components/Button';
 
-const Plus = 'https://cdn.jsdelivr.net/gh/roderickvella/hosting/assets/ui/plus.svg';
 
 export function SkillPopupWrapper({
 	tskill,
@@ -25,6 +24,7 @@ export function SkillPopupWrapper({
 	const [skill, setSkill] = useState<SkillProps>(tskill);
 	const change = useStateUtil(setSkill);
 	const ctx = useWindow();
+	const Plus = assets.getAsset('ui/plus');
 
 	function saveSkill() {
 		setSkill((o) => {

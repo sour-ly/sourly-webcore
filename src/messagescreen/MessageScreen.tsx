@@ -1,13 +1,11 @@
 import { ReactNode, useRef, useState } from 'react';
-import { environment } from '..';
+import { assets, environment } from '..';
 import './styles/messagescreen.scss';
 /*
 import Exit from '../../../assets/ui/exit.svg';
 import Next from '../../../assets/ui/next.svg';
 */
 
-const Exit = 'https://raw.githubusercontent.com/azouaoui-med/react-pro-sidebar/HEAD/src/assets/images/exit.svg';
-const Next = 'https://raw.githubusercontent.com/azouaoui-med/react-pro-sidebar/HEAD/src/assets/images/next.svg';
 
 export type MSCompatiableScreen = {
 	header: { text: string; color: 'red' | 'blue' | 'purple' | '' }[];
@@ -24,6 +22,8 @@ export type MSContext = {
 // Such an example of this is a new version of the application, or a new feature that has been added to the application.
 export function MessageScreen({ flags, pages, onClose }: MSContext) {
 	const [current_page, setCurrentPage] = useState<number>(0);
+	const Next = assets.getAsset('ui/next');
+	const Exit = assets.getAsset('ui/exit');
 
 	if (!pages || pages.length === 0) {
 		return <></>;
@@ -68,7 +68,7 @@ export function MessageScreen({ flags, pages, onClose }: MSContext) {
 						</p>
 					</div>
 					<div className="messagescreen__content__main__body">
-						{pages[current_page].body}
+						{pages[current_page]?.body}
 					</div>
 				</div>
 			</div>

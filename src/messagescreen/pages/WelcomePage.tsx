@@ -7,12 +7,8 @@ import AddGoal from '../../../../assets/images/welcome-screen-add-goal.png';
 import AddGoalPopUp from '../../../../assets/images/welcome-screen-add-goal-popup.png';
 */
 
-const AddSkill = 'https://raw.githubusercontent.com/Anish-Shobith/sourly/main/assets/images/welcome-screen-add-skill.png';
-const AddSkillPopUp = 'https://raw.githubusercontent.com/Anish-Shobith/sourly/main/assets/images/welcome-screen-add-skill-popup.png';
-const AddGoal = 'https://raw.githubusercontent.com/Anish-Shobith/sourly/main/assets/images/welcome-screen-add-goal.png';
-const AddGoalPopUp = 'https://raw.githubusercontent.com/Anish-Shobith/sourly/main/assets/images/welcome-screen-add-goal-popup.png';
 
-import { environment } from '../..';
+import { assets, environment } from '../..';
 const version = "0.0.1"
 
 function WelcomePageSlideOne() {
@@ -55,6 +51,12 @@ function WelcomePageSlideOne() {
 }
 
 function WelcomePageSlideTwo() {
+	const AddSkill = assets?.getAsset('images/welcome-screen-add-skill');
+	const AddSkillPopUp = assets?.getAsset('images/welcome-screen-add-skill-popup');
+	const AddGoal = assets?.getAsset('images/welcome-screen-add-goal');
+	const AddGoalPopUp = assets?.getAsset('images/welcome-screen-add-goal-popup');
+
+
 	return (
 		<div className="messagescreen__content__main__body__section">
 			<p style={{ fontWeight: 400 }}>How to use Sourly</p>

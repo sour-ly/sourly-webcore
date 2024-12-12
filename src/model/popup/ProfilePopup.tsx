@@ -2,9 +2,9 @@ import { useState } from 'react';
 import Input from '../../components/Input';
 import { Profile } from '../../object/Profile';
 import { useWindow } from '../../App';
+import { assets } from '../..';
 //
 //import Pencil from '../../../../assets/ui/pencil.svg';
-const Pencil = 'https://cdn.jsdelivr.net/gh/roderickvella/hosting/assets/ui/pencil.svg';
 
 type EditUsernameProps = {
 	value: string;
@@ -27,6 +27,7 @@ export function EditUsername({ value, change }: EditUsernameProps) {
 export function EditUsernameWrapper({ profile }: { profile: Profile }) {
 	const [username, setUsername] = useState(profile.Name);
 	const window = useWindow();
+	const Pencil = assets.getAsset('ui/pencil');
 
 	function openUsernameEdit() {
 		window.popUp.open({
