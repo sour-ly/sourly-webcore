@@ -75,7 +75,9 @@ export namespace APITypes {
 }
 
 export namespace API {
-	var BASE_URL = `${api.endpoint}/api/v1/`;
+	var BASE_URL = () => {
+		return `${api?.endpoint ?? 'http://localhost:3000'}/api/v1/`
+	};
 
 	const headers = {
 		'Content-Type': 'application/json',
@@ -86,7 +88,7 @@ export namespace API {
 		header: HeadersInit,
 		signal?: AbortSignal
 	): Promise<T | APITypes.APIError> {
-		return fetch(BASE_URL + url, {
+		return fetch(BASE_URL() + url, {
 			method: 'GET',
 			headers: { ...headers, ...header },
 			credentials: 'include',
@@ -112,7 +114,7 @@ export namespace API {
 		header: HeadersInit = {},
 		signal?: AbortSignal
 	): Promise<T | APITypes.APIError> {
-		return fetch(BASE_URL + url, {
+		return fetch(BASE_URL() + url, {
 			method: 'POST',
 			headers: {
 				...headers,

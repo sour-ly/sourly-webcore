@@ -57,9 +57,8 @@ interface AppProps {
 		asset: IAsset;
 		api: IAPI;
 	}
-	apiEndpoint: string;
 }
-async function AppInit({ getProfile, getSettings, getFlags, setFlags, systems, apiEndpoint }: AppProps) {
+async function AppInit({ getProfile, getSettings, getFlags, setFlags, systems }: AppProps) {
 	return await createWaitFunction(
 		new Promise(async (resolve) => {
 			storage = systems.storage;
@@ -67,7 +66,6 @@ async function AppInit({ getProfile, getSettings, getFlags, setFlags, systems, a
 			api = systems.api;
 			sourlysettings = new SettingsObject(await getSettings());
 			profileobj = new Profile();
-			endpoint = apiEndpoint;
 			resolve(null);
 		}),
 		async () => {
