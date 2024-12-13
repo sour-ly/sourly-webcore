@@ -21,7 +21,7 @@ function Home() {
 
 	return (
 		<main className="home">
-			{skills.length === 0 && <h1>No Skills Yet!</h1>}
+			{skills.length === 0 && <h1 style={{ marginBottom: '1rem' }}>No Skills Yet!</h1>}
 			{skills.map((skill) => {
 				return <SkillView key={skill.uid} skill={skill} skills={skills} />;
 			})}

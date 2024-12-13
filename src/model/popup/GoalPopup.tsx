@@ -7,9 +7,9 @@ import Input from '../../components/Input';
 import { ButtonProps } from '../../popup/Popup';
 import { Dropdown } from '../../components/Dropdown';
 import { Button } from '../../components/Button';
+import { assets } from '../..';
 
 //import Plus from '../../../../assets/ui/plus.svg';
-const Plus = 'https://cdn.jsdelivr.net/gh/roderickvella/hosting/assets/ui/plus.svg';
 
 const MetricOptions: Metric[] = [
 	'units',
@@ -138,6 +138,8 @@ export function GoalPopUpWrapper({
 		goalt?.toJSON() ?? { metric: 'Units' },
 	);
 	const change = useStateUtil(setGoal);
+
+	const Plus = assets.getAsset('ui/plus');
 
 
 	useEffect(() => {
