@@ -75,7 +75,7 @@ export namespace APITypes {
 }
 
 export namespace API {
-	var BASE_URL = api.endpoint;
+	var BASE_URL = `${api.endpoint}/api/v1/`;
 
 	const headers = {
 		'Content-Type': 'application/json',
