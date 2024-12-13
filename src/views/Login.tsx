@@ -28,6 +28,7 @@ export function Login() {
 	const navigation = useNavigate();
 	const ctx = useWindow();
 	const [inputData, setInputData] = useState({ username: '', password: '' });
+	const [loading, setLoading] = useState(false);
 	const update = useStateUtil(setInputData);
 
 	useEffect(() => {
@@ -88,7 +89,9 @@ export function Login() {
 			return content[error as keyof typeof content] ?? content['unknown'];
 		}
 
+		setLoading(true);
 		Authentication.login(inputData.username, inputData.password, (state) => {
+			setLoading(false);
 			if (state.loginState.null) return;
 			navigation('/');
 		})
@@ -112,12 +115,14 @@ export function Login() {
 					});
 				}
 			})
-			.catch((e) => { });
+			.catch((e) => { }).finally(() => {
+				setLoading(false)
+			});
 	}
 
 	return (
 		<main className="login">
-			<div className="login__container card">
+			<div className={`login__container card ${loading && 'card-loading'}`}>
 				<h1>Login To Sourly</h1>
 				<p>Welcome to Sourly, please login to continue</p>
 				<div className="login__container__inputs">
