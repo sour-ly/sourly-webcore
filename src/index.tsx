@@ -4,6 +4,7 @@ import { Profile, ProfileProps } from './object/Profile';
 import SettingsObject, { Settings } from './settings/settings';
 import { IStorage } from './interface/istorage';
 import IAsset from './interface/iasset';
+import IAPI from './interface/iapi';
 
 type EnvironmentVariables = {
 	version: string;
@@ -28,6 +29,9 @@ export var endpoint: string;
 export var assets: IAsset = {
 	getAsset: (asset: string) => '',
 };
+export var api: IAPI = {
+	endpoint: 'https://api.sourly.org',
+}
 
 export function setProfile(p: Profile) {
 	profileobj = p;
@@ -51,6 +55,7 @@ interface AppProps {
 	systems: {
 		storage: IStorage;
 		asset: IAsset;
+		api: IAPI;
 	}
 	apiEndpoint: string;
 }
@@ -59,11 +64,10 @@ async function AppInit({ getProfile, getSettings, getFlags, setFlags, systems, a
 		new Promise(async (resolve) => {
 			storage = systems.storage;
 			assets = systems.asset;
+			api = systems.api;
 			sourlysettings = new SettingsObject(await getSettings());
 			profileobj = new Profile();
 			endpoint = apiEndpoint;
-
-
 			resolve(null);
 		}),
 		async () => {
@@ -71,9 +75,11 @@ async function AppInit({ getProfile, getSettings, getFlags, setFlags, systems, a
 				// Handle the case where environment might not be ready
 				throw new Error('Environment is not initialized');
 			}
-
 			if (!assets) {
 				throw new Error('Assets are not initialized');
+			}
+			if (!api) {
+				throw new Error('API is not initialized');
 			}
 			return App;
 		},

@@ -1,5 +1,5 @@
 import { Log } from '../log/log';
-import { endpoint, environment, storage } from '../index';
+import { api, endpoint, environment, storage } from '../index';
 import { GoalProps } from '../object/Goal';
 import { Profile, ProfileProps } from '../object/Profile';
 import Skill, { SkillManager, SkillProps } from '../object/Skill';
@@ -75,7 +75,7 @@ export namespace APITypes {
 }
 
 export namespace API {
-	const BASE_URL = "http://localhost:3000/api/v1/";
+	var BASE_URL = api.endpoint;
 
 	const headers = {
 		'Content-Type': 'application/json',
