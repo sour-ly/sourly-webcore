@@ -76,7 +76,6 @@ export namespace APITypes {
 
 export namespace API {
 	var BASE_URL = () => {
-		console.log('API', api);
 		return `${api?.endpoint ?? 'http://localhost:3000'}/api/v1/`
 	};
 
