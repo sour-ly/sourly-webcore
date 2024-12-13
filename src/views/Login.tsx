@@ -45,7 +45,6 @@ export function Login() {
 				navigation('/login');
 			} else {
 				// logged in
-				navigation('/');
 			}
 		});
 
@@ -89,11 +88,14 @@ export function Login() {
 			return content[error as keyof typeof content] ?? content['unknown'];
 		}
 
-		Authentication.login(inputData.username, inputData.password)
+		Authentication.login(inputData.username, inputData.password, (state) => {
+			if (state.loginState.null) return;
+			navigation('/');
+		})
 			.then((z) => {
 				if (typeof z === 'boolean') {
 					// logged in
-					navigation('/');
+					//
 				} else {
 					ctx.popUp.open({
 						type: 'dialog',

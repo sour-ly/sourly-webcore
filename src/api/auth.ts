@@ -112,6 +112,7 @@ export namespace Authentication {
 	> = {
 		state: () => authEvents.LoginState,
 		setState: async (state) => {
+			console.log('setting login state:', state);
 			if ('callback' in state) {
 				authEvents.LoginStateCallback(state.state, state.callback);
 			} else if (typeof state === 'function') {
@@ -159,6 +160,7 @@ export namespace Authentication {
 	export async function login(
 		login: string,
 		password: string,
+		callback: StateChangeCallback,
 	): Promise<true | string> {
 		const api_resp = await API.queueAndWait(
 			async () => await API.login(login, password),
@@ -177,12 +179,15 @@ export namespace Authentication {
 
 		bLoggedIn = true;
 		loginState.setState({
-			null: false,
-			offline: false,
-			userid: api_resp.userid,
-			username: login,
-			accessToken: api_resp.accessToken,
-			refreshToken: api_resp.refreshToken,
+			state: {
+				null: false,
+				offline: false,
+				userid: api_resp.userid,
+				username: login,
+				accessToken: api_resp.accessToken,
+				refreshToken: api_resp.refreshToken,
+			},
+			callback: callback,
 		});
 
 		return true;
