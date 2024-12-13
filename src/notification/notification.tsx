@@ -93,6 +93,7 @@ function NotificationBanner({
 	const [settings, _] = useSettings();
 
 	useEffect(() => {
+		if (!settings || !settings.notification) return;
 		console.log('settings [notification]', settings.notification);
 	}, [settings]);
 
@@ -104,7 +105,7 @@ function NotificationBanner({
 			}
 			timeout_ref.current = setTimeout(() => {
 				notification.setState(null);
-			}, settings.notification.duration); // change here to change the duration of the notification
+			}, settings!.notification?.duration ?? 5000); // change here to change the duration of the notification
 		}
 		return () => {
 			if (timeout_ref.current) {
@@ -113,7 +114,7 @@ function NotificationBanner({
 		};
 	}, [notification.state]);
 
-	if (settings.notification && !settings.notification.enabled) {
+	if (!settings || settings.notification && !settings.notification.enabled) {
 		return null;
 	}
 

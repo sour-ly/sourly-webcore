@@ -35,7 +35,7 @@ export function Login() {
 			const r = Authentication.getLoggedIn();
 			if (r) {
 				// navigate to the main page
-				navigation('/');
+				console.log('logged in');
 			}
 		};
 		x();
