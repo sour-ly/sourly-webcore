@@ -184,10 +184,10 @@ export namespace API {
 				this.next();
 			});
 			this.on('queue', () => {
-				console.log('[APIQueue] Queued %s with ', this.length, this.data);
+				//console.log('[APIQueue] Queued %s with ', this.length, this.data);
 			})
 			this.on('pop', () => {
-				console.log('[APIQueue] Popped %s with ', this.length, this.data);
+				//console.log('[APIQueue] Popped %s with ', this.length, this.data);
 			});
 
 		}
@@ -216,13 +216,13 @@ export namespace API {
 				});
 			});
 			this.queue(fnc);
-			console.log('[queueAndWait] Queued %s from %s', fn, src);
+			//console.log('[queueAndWait] Queued %s from %s', fn, src);
 			return await promise;
 		}
 
 		// strictly internal use by APIQueue
 		private async next() {
-			const f = this.pop();
+			this.pop();
 		}
 	}
 
