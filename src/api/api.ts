@@ -183,6 +183,13 @@ export namespace API {
 			this.on('queueintoempty', () => {
 				this.next();
 			});
+			this.on('queue', () => {
+				console.log('[APIQueue] Queued %s with ', this.length, this.data);
+			})
+			this.on('pop', () => {
+				console.log('[APIQueue] Popped %s with ', this.length, this.data);
+			});
+
 		}
 
 		static genID(): string {
@@ -204,6 +211,7 @@ export namespace API {
 					if (fnc.id === data.id) {
 						const r = await data.fn();
 						resolve(r);
+						this.next();
 					}
 				});
 			});
@@ -676,7 +684,7 @@ export namespace APIMethods {
 		if (Authentication.getOfflineMode()) {
 			return profileobj;
 		}
-		return await Online.getProfile(uid);
+		return await API.queueAndWait(() => Online.getProfile(uid));
 	}
 
 	export function searchUser(username: string, callback: (users: APITypes.User[] | APITypes.APIError) => void) {

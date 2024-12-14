@@ -28,7 +28,7 @@ function ProfilePage() {
 			//handle the case wherdasde we are given a uid
 			APIMethods.getProfile(uid).then((profile) => {
 				if (!profile) {
-					navigator('/profile');
+					//navigator('/');
 					return;
 				}
 				if ("currentExp" in profile) {
@@ -37,7 +37,7 @@ function ProfilePage() {
 				}
 			}).catch((e) => {
 				Log.log(e, 1, 'ProfilePage');
-				navigator('/profile');
+				//navigator('/');
 			});
 
 			return (() => {

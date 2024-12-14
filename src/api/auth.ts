@@ -281,7 +281,7 @@ export namespace Authentication {
 			return false;
 		}
 		const tokens = await API.queueAndWait(
-			async () => await APIMethods.refresh(),
+			APIMethods.refresh,
 			'auth::refresh::184',
 		);
 		if (!tokens) return false;
