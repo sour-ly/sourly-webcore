@@ -60,7 +60,6 @@ export enum SourlyFlags {
 interface AppProps {
 	getProfile: () => Promise<ProfileProps>;
 	getSettings: () => Promise<Settings>;
-	getFlags: () => Promise<number>;
 	systems: {
 		storage: IStorage;
 		asset: IAsset;
@@ -68,7 +67,7 @@ interface AppProps {
 		flags: IFlags;
 	}
 }
-async function AppInit({ getProfile, getSettings, getFlags, systems }: AppProps) {
+async function AppInit({ getProfile, getSettings, systems }: AppProps) {
 	return await createWaitFunction(
 		new Promise(async (resolve) => {
 			storage = systems.storage;
