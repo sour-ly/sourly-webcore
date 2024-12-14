@@ -7,12 +7,16 @@ import { useEffect, useRef, useState } from 'react';
 import { APIMethods, APITypes } from '../api/api';
 
 
+const cooldown = 250;
+
 function UserSearch() {
 
 	const [query, setQuery] = useState('');
 	const [results, setResults] = useState<APITypes.User[]>([]);
 	const lastCall = useRef<{ abort: AbortController, promise: Promise<any> }>();
+	const timeout = useRef<any>();
 	const offline = Authentication.getOfflineMode();
+	const canQuery = useRef<boolean>(true);
 
 	useEffect(() => {
 		if (offline) return;
@@ -20,19 +24,41 @@ function UserSearch() {
 			setResults([]);
 			return;
 		}
-		const call = APIMethods.searchUser(query, (data) => {
+
+		if (canQuery.current) {
 			if (lastCall.current) {
 				lastCall.current.abort.abort();
 				lastCall.current = undefined;
 			};
-			if ("error" in data) {
-				console.error(data.error);
-				setResults([]);
-				return;
+			const call = APIMethods.searchUser(query, (data) => {
+				if ("error" in data) {
+					console.error(data.error);
+					//do not change resuls incase of error
+					return;
+				}
+				setResults(data);
+			});
+			lastCall.current = call;
+			canQuery.current = false;
+		}
+
+		if (!timeout.current) {
+			timeout.current = setTimeout(() => {
+				canQuery.current = true;
+				timeout.current = undefined;
+			}, cooldown);
+		}
+
+		return () => {
+			if (lastCall.current) {
+				lastCall.current.abort.abort();
+				lastCall.current = undefined;
 			}
-			setResults(data);
-		});
-		lastCall.current = call;
+			if (timeout.current) {
+				clearTimeout(timeout.current);
+				timeout.current = undefined;
+			}
+		}
 
 	}, [query]);
 

@@ -193,36 +193,71 @@ namespace ProfileEvents {
 		}
 
 		export async function goalProgressChanged(skill: Skill, { goal, amount }: { goal: Goal; amount: number }) {
-			return await APIMethods.incrementGoal(goal.Id, skill.Id).then((r) => {
-				if (r === true) return false;
-				if ("error" in r) {
-					Log.log(
-						'Profile:addSkillListeners::incrementGoal',
-						1,
-						'failed to increment goal online - %s',
-						r.error,
-					);
-					return true;
-				}
-				if (r) {
-					Log.log(
-						'Profile:addSkillListeners::incrementGoal',
-						0,
-						'incremented goal online',
-						goal.toJSON(),
-					);
-				} else {
-					Log.log(
-						'Profile:addSkillListeners::incrementGoal',
-						1,
-						'failed to increment goal online',
-						goal.toJSON(),
-					);
-					// absorb the action so it doesn't actually get pushed to the frontend
-					return true;
-				}
-				return false;
-			});
+			if (amount < 0) {
+				return await APIMethods.undoGoal(goal.Id, skill.Id).then(r => {
+					if (r === true) return false;
+					if ("error" in r) {
+						Log.log(
+							'Profile:addSkillListeners::undoGoal',
+							1,
+							'failed to undo goal online - %s',
+							r.error,
+						);
+						return true;
+					}
+					if (r) {
+						Log.log(
+							'Profile:addSkillListeners::undoGoal',
+							0,
+							'undid goal online',
+							goal.toJSON(),
+						);
+						return false;
+					} else {
+						Log.log(
+							'Profile:addSkillListeners::undoGoal',
+							1,
+							'failed to undo goal online',
+							goal.toJSON(),
+						);
+						// absorb the action so it doesn't actually get pushed to the frontend
+						return true;
+					}
+				});
+			}
+			else {
+				return await APIMethods.incrementGoal(goal.Id, skill.Id).then((r) => {
+					if (r === true) return false;
+					if ("error" in r) {
+						Log.log(
+							'Profile:addSkillListeners::incrementGoal',
+							1,
+							'failed to increment goal online - %s',
+							r.error,
+						);
+						return true;
+					}
+					if (r) {
+						Log.log(
+							'Profile:addSkillListeners::incrementGoal',
+							0,
+							'incremented goal online',
+							goal.toJSON(),
+						);
+					} else {
+						Log.log(
+							'Profile:addSkillListeners::incrementGoal',
+							1,
+							'failed to increment goal online',
+							goal.toJSON(),
+						);
+						// absorb the action so it doesn't actually get pushed to the frontend
+						return true;
+					}
+					return false;
+				});
+
+			}
 		}
 
 		export async function goalRemoved(skill: Skill, goal: Goal) {

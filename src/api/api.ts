@@ -506,6 +506,14 @@ namespace Online {
 		);
 	}
 
+	//undo goal progress
+	export async function undoGoal(goal_id: number, skill_id: number) {
+		return await API.get<APITypes.Skill>(
+			`protected/skill/${skill_id}/goal/${goal_id}/dec`,
+			header(),
+		);
+	}
+
 	export async function deleteGoal(goal_id: number, skill_id: number) {
 		return await API.get<APITypes.APIError>(
 			`protected/skill/${skill_id}/goal/${goal_id}/delete`,
@@ -697,6 +705,13 @@ export namespace APIMethods {
 			return true;
 		}
 		return API.queueAndWait(() => Online.incrementGoal(goal_id, skill_id), "incrementGoal");
+	}
+
+	export async function undoGoal(goal_id: number, skill_id: number = 0) {
+		if (Authentication.getOfflineMode()) {
+			return true;
+		}
+		return API.queueAndWait(() => Online.undoGoal(goal_id, skill_id), "undoGoal");
 	}
 
 	export async function refresh() {
