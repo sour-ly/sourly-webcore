@@ -31,7 +31,7 @@ export namespace APITypes {
 		username: string;
 		name: string;
 		level: number;
-		currentExp: number;
+		currentExperience: number;
 		created_at: string;
 	};
 
@@ -49,7 +49,7 @@ export namespace APITypes {
 		id: number;
 		name: string;
 		level: number;
-		currentExp: number;
+		currentExperience: number;
 		created_at: string;
 		goals: Goal[];
 	};
@@ -73,6 +73,8 @@ export namespace APITypes {
 		name: string;
 	}
 }
+
+type Optional<T> = T | undefined;
 
 export namespace API {
 	var BASE_URL = () => {
@@ -404,6 +406,15 @@ namespace Online {
 		return await API.post<APITypes.User | APITypes.APIError>('auth/register', { username, password, email, name });
 	}
 
+	/* MIGRATION STUFF */
+	export async function canMigration(uid: string | number): Promise<{ status: boolean } | APITypes.APIError> {
+		return await API.get<{ status: boolean }>(`protected/user/${uid}/canmigrate`, header());
+	}
+
+	export async function migrate(uid: string | number, profile: ProfileProps & { skills: SkillProps[] }) {
+		return await API.post<APITypes.User | APITypes.APIError>(`protected/user/${uid}/migrate`, profile, header());
+	}
+
 	/* PROFILE STUFF */
 	export async function getProfile(uid: string | number): Promise<APITypes.User> {
 		const r = await API.get<APITypes.User>(
@@ -428,7 +439,7 @@ namespace Online {
 		}
 		profileobj.state.NameEventless = user_obj.name;
 		profileobj.state.Level = user_obj.level;
-		profileobj.state.CurrentExperience = user_obj.currentExp;
+		profileobj.state.CurrentExperience = user_obj.currentExperience;
 		profileobj.state.Flags = flags & ~SourlyFlags.IGNORE;
 	}
 
@@ -614,7 +625,7 @@ export namespace APIMethods {
 					id: `${skill.id}`,
 					name: skill.name,
 					level: skill.level,
-					currentExperience: skill.currentExp,
+					currentExperience: skill.currentExperience,
 					goals: skill.goals.map((goal: APITypes.Goal) => ({
 						id: `${goal.id}`,
 						name: goal.name,
@@ -743,4 +754,52 @@ export namespace APIMethods {
 		}
 		return await API.queueAndWait(() => Online.deleteGoal(goal_id, skill_id), "removeGoal");
 	}
+
+	//MIGRATION STUFF
+	export async function canMigrate(uid: string | number): Promise<({ status: boolean, profile?: ProfileProps } | APITypes.APIError)> {
+		if (Authentication.getOfflineMode()) {
+			return { status: false };
+		}
+		//api response
+		const apiResponse = await API.queueAndWait(() => Online.canMigration(uid), 'canMigrate');
+
+		//lets first check if we have offline data 
+		let oProfile = new Profile();
+		let offlineData = await Offline.getProfile({
+			profileobj: {
+				state: oProfile,
+				setState: (p: Profile) => { oProfile = p; },
+			}, flags: SourlyFlags.NULL
+		});
+		oProfile = offlineData;
+		if (!offlineData) {
+			return { status: false };
+		}
+		//now lets check if the offline data has any skills
+		await Offline.getSkills({
+			profileobj: {
+				state: oProfile,
+				setState: (p: Profile) => { oProfile = p; },
+			}, flags: SourlyFlags.NULL
+		});
+		//whatever let them do it i guess, but lets make this function return the offline data
+		//
+		const skills = oProfile.serializeSkills().map((skill) => {
+			return {
+				...skill, goals: skill.goals.map((goal) => {
+					return { ...goal, skill_id: skill.id, id: Number(goal.id) };
+				})
+			}
+		});
+
+		return { ...apiResponse, profile: { ...oProfile.serialize(), skills } };
+	}
+
+	export async function migrate(uid: string | number, profile: ProfileProps & { skills: SkillProps[] }) {
+		if (Authentication.getOfflineMode()) {
+			return { error: 'offline-mode', message: 'Cannot migrate in offline mode' };
+		}
+		return await API.queueAndWait(() => Online.migrate(uid, profile), 'migrate');
+	}
+
 }

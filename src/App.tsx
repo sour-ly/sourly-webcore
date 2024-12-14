@@ -8,7 +8,7 @@ import NotificationBanner, {
 	NotificationObject,
 } from './notification/notification';
 import { Anchor } from './components/anchor';
-import { environment, profileobj, SourlyFlags } from '.';
+import { environment, flags, profileobj, SourlyFlags } from '.';
 import Home from './views/Home';
 import Queue from './util/queue';
 import Navigator from './navigation/Navigation';
@@ -72,7 +72,7 @@ const version = '1.0.0';
 // @BLOCK
 // @TITLE App Entry
 // @DESC This is the main entry point for the application. This is where the main routing is done and the main context is set up. This is basically the heart of the application
-export default function App({ flags }: { flags: number }) {
+export default function App() {
 
 	/* placeholder for now but -- loading logic */
 	const [loading, setLoading] = useState(true);
@@ -152,12 +152,13 @@ export default function App({ flags }: { flags: number }) {
 		const z = profileobj.on('profilelevelUp', (arg) => {
 			notify(`You have leveled up to level ${arg.level}`);
 		});
+		const flag = flags.getFlags();
 		/* flag checks */
-		if ((flags & SourlyFlags.NEW_PROFILE) ^ (flags & SourlyFlags.NO_SKILLS)) {
+		if ((flag & SourlyFlags.NEW_PROFILE) ^ (flag & SourlyFlags.NO_SKILLS)) {
 			const message =
 				"Welcome to Sourly! We have detected that you don't have a profile, so we have created one for you! (Don't worry we have adjusted your profile to match your skills!)";
 			notify(message);
-		} else if (flags & SourlyFlags.NO_SKILLS) {
+		} else if (flag & SourlyFlags.NO_SKILLS) {
 		} else {
 			const message = 'Welcome back to Sourly!';
 			notify(message);
@@ -166,17 +167,17 @@ export default function App({ flags }: { flags: number }) {
 		// if flags & SEEN_WELCOME is 0, then show the welcome screen 0bx0xx & 0b0100 = 0b0000
 		if ((profileobj.Flags & SourlyFlags.SEEN_WELCOME) === 0) {
 			msg_queue.queue({
-				flags,
+				flags: flag,
 				pages: [WelcomePageSlideOneContext, WelcomePageSlideTwoContext],
 				onClose: () => {
 					setMsgContext(msg_queue.pop() ?? null);
-					profileobj.Flags ^= SourlyFlags.SEEN_WELCOME;
+					flags.xor(SourlyFlags.SEEN_WELCOME);
 				},
 			});
 		}
 		if (profileobj.Version !== version) {
 			msg_queue.queue({
-				flags,
+				flags: flag,
 				pages: [VersionPageContext],
 				onClose: () => {
 					setMsgContext(msg_queue.pop() ?? null);

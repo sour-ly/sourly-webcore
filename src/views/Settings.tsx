@@ -1,7 +1,7 @@
 import './styles/settings.scss';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { environment, sourlysettings } from '..';
+import { environment, profileobj, sourlysettings } from '..';
 import { useStateUtil } from '../util/state';
 import { DisplayNumber, NumberInputFilter } from '../input/filter';
 import { sDefault } from '../settings/settings';
@@ -13,6 +13,9 @@ import {
 import { VersionPageContext } from '../messagescreen/pages/VersionPage';
 import { Button } from '../components/Button';
 import { Authentication } from '../api/auth';
+import { APIMethods } from '../api/api';
+import { ProfileProps } from '../object/Profile';
+import { SkillProps } from '../object/Skill';
 
 type CheckboxProps = {
 	state: boolean;
@@ -70,9 +73,26 @@ function Settings() {
 	const ctx = useWindow();
 	const settings = sourlysettings;
 	const [settings_copy, setSettings] = useState(settings);
+	const [canMigrate, setCanMigrate] = useState(false);
+	const [migrationData, setMigrationData] = useState<ProfileProps & { skills: SkillProps[] }>(null);
 	const change = useStateUtil(setSettings);
 	/* navigation */
 	const navigation = useNavigate();
+
+	useEffect(() => {
+		APIMethods.canMigrate(Authentication.loginState.state().userid)
+			.then((res) => {
+				if (res && !("error" in res)) {
+					// set this to the result of the response
+					if (res.profile) {
+						setCanMigrate(res.status);
+						setMigrationData(res.profile);
+					}
+				} else {
+					setCanMigrate(false);
+				}
+			});
+	}, [])
 
 	useEffect(() => {
 		settings.setAll(settings_copy);
@@ -81,6 +101,57 @@ function Settings() {
 	function logout() {
 		Authentication.logout();
 		// navigation('/login');
+	}
+
+	function migrate() {
+		ctx.popUp.open({
+			title: 'Migrate Account',
+			content: () => (
+				<p>
+					Would you like to migrate your offline data to the server?
+					Please note that once you migrate you cannot migrate again. (You can still use the app offline)
+					Adding skills and goals will prevent you from migrating .
+				</p>
+			),
+			type: 'confirm',
+			options: {
+				onOkay: () => {
+					//execute migration
+					APIMethods.migrate(
+						Authentication.loginState.state().userid,
+						migrationData
+					).then((res) => {
+						if (res && !("error" in res)) {
+							//refresh profile
+							Authentication.onlineMode(() => { });
+							ctx.popUp.open({
+								title: 'Migration Successful',
+								content: () => (
+									<p>
+										Your offline data has been successfully migrated to the server.
+									</p>
+								),
+								type: 'dialog',
+								options: {
+									onOkay: () => {
+										setCanMigrate(false);
+										ctx.popUp.close();
+									},
+									onCancel: () => {
+										ctx.popUp.close();
+									}
+								},
+							});
+						}
+					}).finally(() => {
+						ctx.popUp.close();
+					});
+				},
+				onCancel: () => {
+					ctx.popUp.close();
+				},
+			},
+		});
 	}
 
 	return (
@@ -156,6 +227,15 @@ function Settings() {
 						className="settings__save"
 					>
 						Reset Settings
+					</Button>
+					<Button
+						style={{ marginTop: '1rem' }}
+						type="outline"
+						onClick={migrate}
+						className="settings__save"
+						disabled={!canMigrate}
+					>
+						Migrate Offline Data
 					</Button>
 					<Button
 						style={{ marginTop: '1rem' }}

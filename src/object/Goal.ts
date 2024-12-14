@@ -13,7 +13,7 @@ type EventMap = {
 export type GoalEventMap = EventMap;
 
 export type GoalProps = {
-	id?: string;
+	id?: string | number;
 	name?: string;
 	description?: string;
 	progress?: number;

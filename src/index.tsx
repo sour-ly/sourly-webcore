@@ -5,6 +5,7 @@ import SettingsObject, { Settings } from './settings/settings';
 import { IStorage } from './interface/istorage';
 import IAsset from './interface/iasset';
 import IAPI from './interface/iapi';
+import IFlags from './interface/iflag';
 
 type EnvironmentVariables = {
 	version: string;
@@ -26,6 +27,14 @@ export var profileobj: Profile;
 export var sourlysettings: Settings;
 export var storage: IStorage;
 export var endpoint: string;
+export var flags: IFlags = {
+	getFlags: () => 0,
+	setFlags: (flags: number) => 0,
+	xor: (flag: number) => flags,
+	or: (flag: number) => flags,
+	and: (flag: number) => flags,
+	not: () => flags,
+};
 export var assets: IAsset = {
 	getAsset: (asset: string) => '',
 };
@@ -44,6 +53,7 @@ export enum SourlyFlags {
 	NO_SKILLS = 0x02,
 	SEEN_WELCOME = 0x04,
 	IGNORE = 0x08,
+	SEEN_MIGRATION = 0x10,
 }
 
 //this is going to be the main entry point for the app, this is really important in how the app is going to be structured regardless of the platform; this will allow us to interface with the main process and the renderer process
@@ -51,19 +61,20 @@ interface AppProps {
 	getProfile: () => Promise<ProfileProps>;
 	getSettings: () => Promise<Settings>;
 	getFlags: () => Promise<number>;
-	setFlags: (flags: number) => Promise<void>;
 	systems: {
 		storage: IStorage;
 		asset: IAsset;
 		api: IAPI;
+		flags: IFlags;
 	}
 }
-async function AppInit({ getProfile, getSettings, getFlags, setFlags, systems }: AppProps) {
+async function AppInit({ getProfile, getSettings, getFlags, systems }: AppProps) {
 	return await createWaitFunction(
 		new Promise(async (resolve) => {
 			storage = systems.storage;
 			assets = systems.asset;
 			api = systems.api;
+			flags = systems.flags;
 			sourlysettings = new SettingsObject(await getSettings());
 			profileobj = new Profile();
 			resolve(null);

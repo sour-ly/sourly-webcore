@@ -7,32 +7,25 @@ export function VersionPage() {
 			<div className="messagescreen__content__main__body__section">
 				<h2>Whats New?:</h2>
 				<p>
-					This is the seventh version of the application (alpha), this version
-					is a minor update that adds a few things, and fixes a few things.
+					Welcome to the new 0.1.0 version of Sourly! This version changes a lot and adds a bit more to the application. This leap forward is pivotal in the development of the application, and I hope you enjoy the new features that have been added.
 				</p>
 				<p>
-					The first thing was to add... well this page. This page serves as a
-					way to show the user what has changed and what has been added to the
-					application. I think this is a good way to keep the user informed
-					about what is going on with the application.
+					First and foremost, the addition of the backend API is a huge step forward in the development of the application. This will allow the application to be more dynamic and allow for more features to be added in the future. This allows us to sync our data with multiple devices, and allows us to have a more robust system for the application. This also opens the door for more API-like features, such as a websocket notification system, social features, inventory, and more.
 				</p>
 				<p>
-					This page could contain a lot of information, such as images, videos,
-					gifs, and other things that could be used to show the user content.
-					This is also planned to be used as a way to show the user how to use
-					the application, and how to use the features of the applic
+					The most neat feature that has been added is the Google Authentication system. This allows you to sign in with your Google account, and allows you to sync your data with multiple devices. This is a huge step forward in the development of the application, and I hope you enjoy this feature.
+				</p>
+				<p>
+					Last but not least, the application has been ported to the web. This allows you to use the application on any device, and allows you to sync your data with multiple devices. This is a huge step forward in the development of the application, and I hope you enjoy this feature.
 				</p>
 				<h3> TL;DR </h3>
 				<ul>
+					<li>Ported Sourly to the web</li>
 					<li>Added API</li>
-					<li>Added Dark Mode</li>
-					<li>Huge UI overhaul</li>
-				</ul>
-			</div>
-			<div className="messagescreen__content__main__body__section">
-				<h2>Fixes:</h2>
-				<ul>
-					<li>Fixed a weird overflow bug that happens on the Settings Page</li>
+					<li>Added Google Authentication</li>
+					<li>Fixed a lot of bugs</li>
+					<li>Maintained the same look and feel</li>
+					<li>Offline to Online (one-time) migration</li>
 				</ul>
 			</div>
 			<div className="messagescreen__content__main__body__section">
@@ -42,13 +35,10 @@ export function VersionPage() {
 					application, such as:
 				</p>
 				<ul>
-					<li>Marking Skills as "done" and giving the user EXP</li>
-					<li>Adding a better settings page</li>
-					<li>Very simple Achievement/Badge system</li>
-					<li>Migrating to a new online {'<-->'} offline system</li>
-					<li>Adding avatars to the application</li>
-					<li>Adding a way to change the theme of the application</li>
-					<li>History</li>
+					<li>Adding a notification system from the backend server</li>
+					<li>A mobile-friendly version of the application</li>
+					<li>Adding a social feature to the application</li>
+					<li>Very simple inventory and drop system</li>
 				</ul>
 			</div>
 		</>

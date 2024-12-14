@@ -39,7 +39,7 @@ type EventMap = {
 };
 
 export type SkillProps = {
-	id?: string;
+	id?: string | number;
 	name?: string;
 	level?: number;
 	currentExperience?: number;
