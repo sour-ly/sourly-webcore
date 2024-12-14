@@ -8,7 +8,7 @@ import NotificationBanner, {
 	NotificationObject,
 } from './notification/notification';
 import { Anchor } from './components/anchor';
-import { environment, flags, profileobj, SourlyFlags } from '.';
+import { environment, flags, profileobj, SourlyFlags, storage } from '.';
 import Home from './views/Home';
 import Queue from './util/queue';
 import Navigator from './navigation/Navigation';
@@ -165,7 +165,7 @@ export default function App() {
 		}
 		/* check if the user's version in the `storage.json` file is out of date, if so - present the user with the new patch notes and update their value */
 		// if flags & SEEN_WELCOME is 0, then show the welcome screen 0bx0xx & 0b0100 = 0b0000
-		if ((profileobj.Flags & SourlyFlags.SEEN_WELCOME) === 0) {
+		if ((flag & SourlyFlags.SEEN_WELCOME) === 0) {
 			msg_queue.queue({
 				flags: flag,
 				pages: [WelcomePageSlideOneContext, WelcomePageSlideTwoContext],
@@ -175,13 +175,14 @@ export default function App() {
 				},
 			});
 		}
-		if (profileobj.Version !== version) {
+		const v = storage.get('version');
+		if (!v || v !== version) {
 			msg_queue.queue({
 				flags: flag,
 				pages: [VersionPageContext],
 				onClose: () => {
+					storage.save('version', version);
 					setMsgContext(msg_queue.pop() ?? null);
-					profileobj.Version = version;
 				},
 			});
 		}
