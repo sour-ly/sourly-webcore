@@ -31,6 +31,8 @@ import { Authentication } from './api/auth';
 import { APIMethods } from './api/api';
 import { Signup } from './views/Signup';
 import UserSearch from './views/UserSearch';
+import { Electron } from './util/electron';
+import IPC from './ReactIPC';
 
 export type WindowContextType = {
 	popUp: WindowPopUp;
@@ -100,25 +102,28 @@ export default function App() {
 	/* main init function for the application */
 	useEffect(() => {
 
-		/* Deeplink listener 
-		IPC.on('deeplink', (e) => {
-			if (e.func === 'login') {
-				if (e.token && e.refresh_token && e.user_id) {
-					Authentication.absorbTokens(e.token, e.refresh_token, e.user_id).then(r => {
-						if ("error" in r) {
-							console.log(r.error);
-						} else {
-							//just do nothing, let some component listen to us
-						}
-					});
-					//refresh
-				} else if (e.error && e.code && e.message) {
-					//error
-					notify(e.message);
+		if (Electron.isUsingElectron) {
+			IPC.on('deeplink', (e) => {
+				if (e.func === 'login') {
+					if (e.token && e.refresh_token && e.user_id) {
+						Authentication.absorbTokens(e.token, e.refresh_token, e.user_id).then(r => {
+							if ("error" in r) {
+								console.log(r.error);
+							} else {
+								//just do nothing, let some component listen to us
+							}
+						});
+						//refresh
+					} else if (e.error && e.code && e.message) {
+						//error
+						notify(e.message);
+					}
 				}
-			}
-		});
-		*/
+			});
+		}
+
+		let z = 0;
+		let x = 0;
 
 		/* grab the user's login data */
 		APIMethods.getLoginState().then(async (login) => {
@@ -136,60 +141,62 @@ export default function App() {
 					},
 				});
 			}
-		});
+		}).finally(() => {
 
+			/* simply call the adjustTheme function */
+			adjustTheme();
 
-		/* simply call the adjustTheme function */
-		adjustTheme();
-
-		/* notification queue listeners */
-		const x = notification_queue.on('update', (q) => {
-			setNotificationAmount(q.length);
-		});
-
-		// change the title of the document
-		window.document.title = `Sourly v${environment.version}`;
-		const z = profileobj.on('profilelevelUp', (arg) => {
-			notify(`You have leveled up to level ${arg.level}`);
-		});
-		const flag = flags.getFlags();
-		/* flag checks */
-		if ((flag & SourlyFlags.NEW_PROFILE) ^ (flag & SourlyFlags.NO_SKILLS)) {
-			const message =
-				"Welcome to Sourly! We have detected that you don't have a profile, so we have created one for you! (Don't worry we have adjusted your profile to match your skills!)";
-			notify(message);
-		} else if (flag & SourlyFlags.NO_SKILLS) {
-		} else {
-			const message = 'Welcome back to Sourly!';
-			notify(message);
-		}
-		/* check if the user's version in the `storage.json` file is out of date, if so - present the user with the new patch notes and update their value */
-		// if flags & SEEN_WELCOME is 0, then show the welcome screen 0bx0xx & 0b0100 = 0b0000
-		if ((flag & SourlyFlags.SEEN_WELCOME) === 0) {
-			msg_queue.queue({
-				flags: flag,
-				pages: [WelcomePageSlideOneContext, WelcomePageSlideTwoContext],
-				onClose: () => {
-					setMsgContext(msg_queue.pop() ?? null);
-					flags.xor(SourlyFlags.SEEN_WELCOME);
-				},
+			/* notification queue listeners */
+			x = notification_queue.on('update', (q) => {
+				setNotificationAmount(q.length);
 			});
-		}
-		const v = storage.get('version');
-		if (!v || v !== version) {
-			msg_queue.queue({
-				flags: flag,
-				pages: [VersionPageContext],
-				onClose: () => {
-					storage.save('version', version);
-					setMsgContext(msg_queue.pop() ?? null);
-				},
-			});
-		}
-		/* these are enqueued messages */
 
-		/* start the message queue */
-		setMsgContext(msg_queue.pop() ?? null);
+			// change the title of the document
+			window.document.title = `Sourly v${environment.version}`;
+			z = profileobj.on('profilelevelUp', (arg) => {
+				notify(`You have leveled up to level ${arg.level}`);
+			});
+			const flag = flags.getFlags();
+			/* flag checks */
+			if ((flag & SourlyFlags.NEW_PROFILE) ^ (flag & SourlyFlags.NO_SKILLS)) {
+				const message =
+					"Welcome to Sourly! We have detected that you don't have a profile, so we have created one for you! (Don't worry we have adjusted your profile to match your skills!)";
+				notify(message);
+			} else if (flag & SourlyFlags.NO_SKILLS) {
+			} else {
+				const message = 'Welcome back to Sourly!';
+				notify(message);
+			}
+			/* check if the user's version in the `storage.json` file is out of date, if so - present the user with the new patch notes and update their value */
+			// if flags & SEEN_WELCOME is 0, then show the welcome screen 0bx0xx & 0b0100 = 0b0000
+			if ((flag & SourlyFlags.SEEN_WELCOME) === 0) {
+				msg_queue.queue({
+					flags: flag,
+					pages: [WelcomePageSlideOneContext, WelcomePageSlideTwoContext],
+					onClose: () => {
+						setMsgContext(msg_queue.pop() ?? null);
+						flags.or(SourlyFlags.SEEN_WELCOME);
+					},
+				});
+			}
+			storage.get('version').then((v) => {
+				if (!v || v !== version) {
+					msg_queue.queue({
+						flags: flag,
+						pages: [VersionPageContext],
+						onClose: () => {
+							storage.save('version', version);
+							setMsgContext(msg_queue.pop() ?? null);
+						},
+					});
+				}
+			});
+
+			/* these are enqueued messages */
+
+			/* start the message queue */
+			setMsgContext(msg_queue.pop() ?? null);
+		});
 
 		return () => {
 			if (z) {
@@ -305,7 +312,7 @@ export default function App() {
 					msgScreen: {
 						open: (...ctx: MSCompatiableScreen[]) => {
 							openMessageScreen({
-								flags,
+								flags: flags.getFlags(),
 								pages: [...ctx],
 								onClose: () => {
 									setMsgContext(null);

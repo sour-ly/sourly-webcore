@@ -6,23 +6,13 @@ import { IStorage } from './interface/istorage';
 import IAsset from './interface/iasset';
 import IAPI from './interface/iapi';
 import IFlags from './interface/iflag';
+import IEnvironment from './interface/ienvironment';
 
-type EnvironmentVariables = {
-	version: string;
-	mode: 'production' | 'development';
-	debug: boolean;
-	platform: string;
-	endpoint?: string;
+export var environment: IEnvironment = {
+	version: '0.1.0',
+	mode: 'development',
+	platform: 'web',
 };
-
-export let environment: EnvironmentVariables = {
-	version: '-0.0.0',
-	mode: 'production',
-	debug: false,
-	platform: 'win32',
-	endpoint: 'https://api.sourly.io',
-};
-
 export var profileobj: Profile;
 export var sourlysettings: Settings;
 export var storage: IStorage;
@@ -65,6 +55,7 @@ interface AppProps {
 		asset: IAsset;
 		api: IAPI;
 		flags: IFlags;
+		env: IEnvironment;
 	}
 }
 async function AppInit({ getProfile, getSettings, systems }: AppProps) {
@@ -74,6 +65,7 @@ async function AppInit({ getProfile, getSettings, systems }: AppProps) {
 			assets = systems.asset;
 			api = systems.api;
 			flags = systems.flags;
+			environment = systems.env ?? environment;
 			sourlysettings = new SettingsObject(await getSettings());
 			profileobj = new Profile();
 			resolve(null);

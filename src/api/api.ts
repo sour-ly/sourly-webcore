@@ -318,9 +318,11 @@ namespace Offline {
 		profileobj,
 		flags,
 	}: GetSkillProps): Promise<void> {
-		return new Promise(async (resolve) => {
+		return await new Promise(async (resolve) => {
+			console.log('getting skills');
 			const arg = await storage.get('skill')
 			const data = arg;
+			console.log('got skills', data);
 			let new_profile_flag = false;
 
 			if (!profileobj.state || !(profileobj.state instanceof Profile)) {
@@ -568,6 +570,7 @@ export namespace APIMethods {
 		flags,
 	}: GetSkillProps): Promise<void> {
 		const profile = await Offline.getProfile({ profileobj, flags });
+		console.log('got profile', profile);
 		await Offline.getSkills({
 			profileobj: { state: profile, setState: profileobj.setState },
 			flags,
