@@ -31,10 +31,8 @@ function ProfilePage() {
 					//navigator('/');
 					return;
 				}
-				if ("currentExp" in profile) {
-					//@ts-ignore we are going to set the current experience to the currentExp
-					setProfile({ ...profile, currentExperience: profile.currentExp });
-				}
+
+				setProfile({ ...profile });
 			}).catch((e) => {
 				Log.log(e, 1, 'ProfilePage');
 				//navigator('/');
