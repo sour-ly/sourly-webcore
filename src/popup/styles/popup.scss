@@ -1,3 +1,5 @@
+@import '../../breakpoints.scss';
+
 #popup,
 .popup {
   position: fixed;
@@ -148,6 +150,11 @@
         border-radius: 50%;
         background: #ff5f57;
         cursor: pointer;
+
+        @include media('<=tablet') {
+          width: 16px;
+          height: 16px;
+        }
       }
     }
 

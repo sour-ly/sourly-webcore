@@ -1,3 +1,5 @@
+@import '../../breakpoints.scss';
+
 nav.navigation {
   position: absolute;
   left: 50%;
@@ -32,12 +34,17 @@ nav.navigation {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 125px;
+    --width: 125px;
+    width: var(--width);
     height: 30px;
     user-select: none;
     cursor: pointer;
     transition: background 0.3s, transform 0.3s;
     border-radius: 2rem;
+
+    @include media('<=LGphone') {
+      --width: 75px;
+    }
 
 
     &.effect,
@@ -47,7 +54,7 @@ nav.navigation {
       border: 1px solid var(--navigation-bar-button-border-color);
       top: .025rem;
       --spot: 0;
-      left: calc(125px * var(--spot) + .05rem);
+      left: calc(var(--width) * var(--spot) + .05rem);
       transition: all 0.3s;
       z-index: 101;
       //disable all cursor events

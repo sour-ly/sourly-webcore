@@ -1,3 +1,5 @@
+@import '../../breakpoints.scss';
+
 button.button {
 
   width: 100%;
@@ -9,6 +11,14 @@ button.button {
   font-weight: 500;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+
+  @include media('<=tablet') {
+    font-size: 18px;
+    min-height: 32px;
+    height: auto;
+  }
 
   span {
     display: inline-block;
@@ -21,6 +31,11 @@ button.button {
     height: 11px;
     transform: translateY(1px);
     margin-right: 5px;
+
+    @include media('<=tablet') {
+      width: 16px;
+      height: 16px;
+    }
   }
 
   &.solid {

@@ -1,4 +1,5 @@
 @import './globals.scss';
+@import './breakpoints.scss';
 
 body {
   font-family: 'Inter', sans-serif;
@@ -23,6 +24,11 @@ main {
   max-width: 600px;
   width: 600px;
 
+  @include media('<=LGphone') {
+    max-width: 95vw;
+    width: 90vw;
+  }
+
   &.home {
     p {
       margin: 10px;
@@ -45,7 +51,7 @@ h1 {
 
 button.add_skill {
   width: 100%;
-  margin-top: 25px;
+  margin-top: 0.6667rem;
 }
 
 .version {
