@@ -448,8 +448,13 @@ namespace Online {
 	// okay lets search for users
 	export function searchUser(username: string, callback: (users: APITypes.User[] | APITypes.APIError) => void) {
 		const signal = new AbortController();
-		const r = API.post<APITypes.User[]>(`protected/user/search?name=${username}`, {}, header(), signal.signal).then(callback);
-		return { abort: signal, promise: r };
+		const promise = API.queueAndWait(() => Authentication.refresh(false, 'getProfile')).then(async (r) => {
+			if (!r) {
+				return { 'error': 'no-refresh', 'message': 'No refresh token' };
+			}
+			else return await API.post<APITypes.User[]>(`protected/user/search?name=${username}`, {}, header(), signal.signal).then(callback);
+		});;
+		return { abort: signal, promise };
 	}
 
 	export function refreshToken() {
@@ -658,6 +663,10 @@ export namespace APIMethods {
 			return true;
 		}
 		if (onlineFlags === 'create') {
+			const refresh = await API.queueAndWait(() => Authentication.refresh(false, 'getProfile'));
+			if (!refresh) {
+				return { error: 'no-refresh', message: 'refresh failed' } as APITypes.APIError;
+			}
 			// create the skill
 			const r = await API.queueAndWait(() => Online.addSkills(skills.name), "saveSkills");
 			if ('error' in r) {
@@ -679,6 +688,10 @@ export namespace APIMethods {
 		if (Authentication.getOfflineMode()) {
 			return true;
 		}
+		const refresh = await API.queueAndWait(() => Authentication.refresh(false, 'getProfile'));
+		if (!refresh) {
+			return { error: 'no-refresh', message: 'refresh failed' } as APITypes.APIError;
+		}
 		return API.queueAndWait(() => Online.editGoal(skill_id, goal_id, goalProps), "updateGoal");
 	}
 
@@ -686,6 +699,10 @@ export namespace APIMethods {
 		if (Authentication.getOfflineMode()) {
 			return true;
 		} else {
+			const refresh = await API.queueAndWait(() => Authentication.refresh(false, 'getProfile'));
+			if (!refresh) {
+				return { error: 'no-refresh', message: 'refresh failed' } as APITypes.APIError;
+			}
 			const r = await API.queueAndWait(() => Online.deleteSkill(skill_id), "removeSkill");
 			if ('error' in r) {
 				return false;
@@ -698,10 +715,15 @@ export namespace APIMethods {
 		if (Authentication.getOfflineMode()) {
 			return profileobj;
 		}
+		const refresh = await API.queueAndWait(() => Authentication.refresh(false, 'getProfile'));
+		if (!refresh) {
+			return { error: 'no-refresh', message: 'refresh failed' } as APITypes.APIError;
+		}
 		return await API.queueAndWait(() => Online.getProfile(uid));
 	}
 
 	export function searchUser(username: string, callback: (users: APITypes.User[] | APITypes.APIError) => void) {
+
 		return Online.searchUser(username, callback);
 	}
 
@@ -715,6 +737,10 @@ export namespace APIMethods {
 				if (!profile.name) {
 					return { error: 'no-name', message: 'No name provided' };
 				}
+				const refresh = await API.queueAndWait(() => Authentication.refresh(false, 'getProfile'));
+				if (!refresh) {
+					return { error: 'no-refresh', message: 'refresh failed' } as APITypes.APIError;
+				}
 				//the "" won't matter because of the check above --- pesky typescript linter
 				const r = await API.queueAndWait(() => Online.editProfileName(profile.name ?? ""), "saveProfile");
 				return r;
@@ -726,12 +752,20 @@ export namespace APIMethods {
 		if (Authentication.getOfflineMode()) {
 			return true;
 		}
+		const refresh = await API.queueAndWait(() => Authentication.refresh(false, 'getProfile'));
+		if (!refresh) {
+			return { error: 'no-refresh', message: 'refresh failed' } as APITypes.APIError;
+		}
 		return API.queueAndWait(() => Online.incrementGoal(goal_id, skill_id), "incrementGoal");
 	}
 
 	export async function undoGoal(goal_id: number, skill_id: number = 0) {
 		if (Authentication.getOfflineMode()) {
 			return true;
+		}
+		const refresh = await API.queueAndWait(() => Authentication.refresh(false, 'getProfile'));
+		if (!refresh) {
+			return { error: 'no-refresh', message: 'refresh failed' } as APITypes.APIError;
 		}
 		return API.queueAndWait(() => Online.undoGoal(goal_id, skill_id), "undoGoal");
 	}
@@ -747,6 +781,10 @@ export namespace APIMethods {
 		if (Authentication.getOfflineMode()) {
 			return true;
 		} else {
+			const refresh = await API.queueAndWait(() => Authentication.refresh(false, 'getProfile'));
+			if (!refresh) {
+				return { error: 'no-refresh', message: 'refresh failed' } as APITypes.APIError;
+			}
 			return await API.queueAndWait(() => Online.addGoal(skill_id, goalProps), "addGoal");
 		}
 	}
@@ -754,6 +792,10 @@ export namespace APIMethods {
 	export async function removeGoal(goal_id: number, skill_id: number = 0) {
 		if (Authentication.getOfflineMode()) {
 			return true;
+		}
+		const refresh = await API.queueAndWait(() => Authentication.refresh(false, 'getProfile'));
+		if (!refresh) {
+			return { error: 'no-refresh', message: 'refresh failed' } as APITypes.APIError;
 		}
 		return await API.queueAndWait(() => Online.deleteGoal(goal_id, skill_id), "removeGoal");
 	}
@@ -763,6 +805,11 @@ export namespace APIMethods {
 		if (Authentication.getOfflineMode()) {
 			return { status: false };
 		}
+		const refresh = await API.queueAndWait(() => Authentication.refresh(false, 'getProfile'));
+		if (!refresh) {
+			return { error: 'no-refresh', message: 'refresh failed' } as APITypes.APIError;
+		}
+
 		//api response
 		const apiResponse = await API.queueAndWait(() => Online.canMigration(uid), 'canMigrate');
 
