@@ -9,14 +9,13 @@ import AddGoalPopUp from '../../../../assets/images/welcome-screen-add-goal-popu
 
 
 import { assets, environment } from '../..';
-const version = "0.0.1"
 
 function WelcomePageSlideOne() {
 	return (
 		<div className="messagescreen__content__main__body__section">
-			<p style={{ fontWeight: 400 }}>Welcome to Sourly (alpha - v{version})</p>
+			<p style={{ fontWeight: 400 }}>Welcome to Sourly (alpha - v{environment.version})</p>
 			<p style={{ fontWeight: 300 }}>
-				Sour-ly aims to be a multi-platform application that allows users to
+				Sourly aims to be a multi-platform application that allows users to
 				create, log, and track the progress on their skills through
 				gamification. Sour-ly rewards users with EXP and levels up their skills
 				(and themselves) as they progress. Skills can be anything from learning
@@ -30,6 +29,10 @@ function WelcomePageSlideOne() {
 				can also create goals for your skills and track your progress on them.
 				Tracking your progress will reward you and your skill with EXP.
 				Collecting EXP will eventually level up your skill and yourself.
+			</p>
+			<p style={{ fontWeight: 300 }}>
+				You can also expect to be able to view your profile and see your
+				progress. You can also expect to be able to view the progress of other users on the application. However, you cannot interact with them (yet).
 			</p>
 			<p>What You Can Expect In The Future:</p>
 			<p style={{ fontWeight: 300 }}>
