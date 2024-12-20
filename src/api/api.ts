@@ -147,8 +147,8 @@ export namespace API {
 			body: JSON.stringify(body),
 			signal: signal
 		})
-			.then((res) => {
-				const r = res.json();
+			.then(async (res) => {
+				const r = await res.json();
 				if ('error' in r) {
 					return { ...r, code: res.status };
 				}
@@ -469,8 +469,11 @@ namespace Online {
 	// okay lets search for users
 	export function searchUser(username: string, callback: (users: APITypes.User[] | APITypes.APIError) => void) {
 		const signal = new AbortController();
-		const r = API.post<APITypes.User[]>(`protected/user/search?name=${username}`, {}, header(), signal.signal).then(callback);
-		return { abort: signal, promise: r };
+		const r = API.post<APITypes.User[]>(`protected/user/search?name=${username}`, {}, header(), signal.signal);
+		r.then((data) => {
+			callback(data);
+		});
+		return { abort: signal, promise: r as Promise<APITypes.User | APITypes.APIError> };
 	}
 
 	export function refreshToken() {
@@ -765,6 +768,25 @@ export namespace APIMethods {
 		return await Online.refreshToken();
 	}
 
+	/* Refresh Only If Failed */
+	export async function refreshIfFailed<T extends object | APITypes.APIError>(f: () => Promise<T>): Promise<T> {
+		if (Authentication.getOfflineMode()) {
+			return f();
+		}
+		//first lets try to get the data
+		const r = await f();
+		if ('error' in r && r.code === 401) {
+			//lets try to refresh
+			const rr = await Authentication.refresh();
+			if (rr) {
+				//lets try to get the data again
+				return await f();
+			}
+		} else {
+			return r; //TODO:handle the error as is
+		}
+	}
+
 	export async function addGoal(skill_id: number, goalProps: GoalProps) {
 		if (Authentication.getOfflineMode()) {
 			return true;
@@ -783,6 +805,9 @@ export namespace APIMethods {
 	//MIGRATION STUFF
 	export async function canMigrate(uid: string | number): Promise<({ status: boolean, profile?: ProfileProps } | APITypes.APIError)> {
 		if (Authentication.getOfflineMode()) {
+			return { status: false };
+		}
+		if (!Authentication.loginState.state() || Authentication.loginState.state().null || !Authentication.loginState.state().userid || !Authentication.loginState.state().accessToken || Authentication.loginState.state().offline) {
 			return { status: false };
 		}
 		//api response
@@ -826,5 +851,7 @@ export namespace APIMethods {
 		}
 		return await API.queueAndWait(() => Online.migrate(uid, profile), 'migrate');
 	}
+
+
 
 }

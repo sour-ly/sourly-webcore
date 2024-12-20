@@ -27,7 +27,7 @@ namespace ProfileEvents {
 		export async function onNameChange({ name }: { profile: Profile; name: string }) {
 			if (!name) return true;
 			//send the name to the API
-			const r = await APIMethods.saveProfile({ name }, 'name');
+			const r = await APIMethods.refreshIfFailed(() => APIMethods.saveProfile({ name }, 'name'));
 			return "error" in r;
 		}
 
@@ -35,7 +35,7 @@ namespace ProfileEvents {
 		/* SKILL STUFF */
 		export async function skillCreated({ newSkill }: { newSkill: Skill }) {
 			if (!newSkill || Authentication.getOfflineMode()) return false;
-			const r = await APIMethods.saveSkills(newSkill.toJSON(), 'create');
+			const r = await APIMethods.refreshIfFailed(() => APIMethods.saveSkills(newSkill.toJSON(), 'create'));
 			if (r == true) return false;
 			else if (r === false) {
 				return true;
@@ -68,7 +68,7 @@ namespace ProfileEvents {
 
 		export async function skillChanged({ skill, newSkill }: { skill: Skill, newSkill: SkillProps }) {
 			if (!newSkill) return true;
-			const r = await APIMethods.saveSkills({ id: skill.Id, name: newSkill.name }, 'update');
+			const r = await APIMethods.refreshIfFailed(() => APIMethods.saveSkills({ id: skill.Id, name: newSkill.name }, 'update'));
 			if (r == true) return false;
 			if (!("error" in r)) {
 				if (Authentication.getOfflineMode()) {
@@ -97,7 +97,7 @@ namespace ProfileEvents {
 
 		export async function skillRemoved({ newSkill }: { newSkill: Skill }) {
 			if (!newSkill) return true;
-			const r = await APIMethods.saveSkills(newSkill.toJSON(), 'delete');
+			const r = await APIMethods.refreshIfFailed(() => APIMethods.saveSkills(newSkill.toJSON(), 'delete'));
 			if (r == true) return false;
 			if (r) {
 				if (Authentication.getOfflineMode()) {
@@ -126,7 +126,7 @@ namespace ProfileEvents {
 
 		/* GOAL STUFF */
 		export async function goalCreated(skill: Skill, { newGoal }: { newGoal: Goal }) {
-			return await APIMethods.addGoal(skill.Id, newGoal.toJSON()).then((r) => {
+			return await APIMethods.refreshIfFailed(() => APIMethods.addGoal(skill.Id, newGoal.toJSON())).then((r) => {
 				if (r === true) return false;
 				if ("error" in r) {
 					Log.log(
@@ -160,7 +160,7 @@ namespace ProfileEvents {
 		}
 
 		export async function goalUpdated(skill: Skill, { goal, newGoal }: { goal: Goal; newGoal: Goal }) {
-			return await APIMethods.updateGoal(Number(newGoal.Id) ?? 0, skill.Id, newGoal.toJSON()).then((r) => {
+			return await APIMethods.refreshIfFailed(() => APIMethods.updateGoal(Number(newGoal.Id) ?? 0, skill.Id, newGoal.toJSON())).then((r) => {
 				if (r === true) return false;
 				if ("error" in r) {
 					Log.log(
@@ -194,7 +194,7 @@ namespace ProfileEvents {
 
 		export async function goalProgressChanged(skill: Skill, { goal, amount }: { goal: Goal; amount: number }) {
 			if (amount < 0) {
-				return await APIMethods.undoGoal(goal.Id, skill.Id).then(r => {
+				return await APIMethods.refreshIfFailed(() => APIMethods.undoGoal(goal.Id, skill.Id)).then(r => {
 					if (r === true) return false;
 					if ("error" in r) {
 						Log.log(
@@ -226,7 +226,7 @@ namespace ProfileEvents {
 				});
 			}
 			else {
-				return await APIMethods.incrementGoal(goal.Id, skill.Id).then((r) => {
+				return await APIMethods.refreshIfFailed(() => APIMethods.incrementGoal(goal.Id, skill.Id)).then((r) => {
 					if (r === true) return false;
 					if ("error" in r) {
 						Log.log(
@@ -261,7 +261,7 @@ namespace ProfileEvents {
 		}
 
 		export async function goalRemoved(skill: Skill, goal: Goal) {
-			return await APIMethods.removeGoal(goal.Id, skill.Id).then((r) => {
+			return await APIMethods.refreshIfFailed(() => APIMethods.removeGoal(goal.Id, skill.Id)).then((r) => {
 				if (r === true) return false;
 				if ("error" in r) {
 					Log.log(
@@ -308,15 +308,15 @@ namespace ProfileEvents {
 					'saved profile to storage',
 					profile,
 				);
-				APIMethods.saveProfile(profile.serialize());
-				APIMethods.saveSkills(profile.serializeSkills());
+				APIMethods.refreshIfFailed(() => APIMethods.saveProfile(profile.serialize()));
+				APIMethods.refreshIfFailed(() => APIMethods.saveSkills(profile.serializeSkills()));
 			}
 			// IPC.sendMessage('storage-save', { key: 'profile', value: profile.serialize() });
 		}
 
 		export async function experienceGained(profile: Profile) {
 			if (Authentication.getOfflineMode()) {
-				await APIMethods.saveSkills(profile.serializeSkills(), "update");
+				await APIMethods.refreshIfFailed(() => APIMethods.saveSkills(profile.serializeSkills(), "update"));
 			}
 			return;
 		}

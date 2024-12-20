@@ -30,15 +30,18 @@ function UserSearch() {
 				lastCall.current.abort.abort();
 				lastCall.current = undefined;
 			};
-			const call = APIMethods.searchUser(query, (data) => {
-				if ("error" in data) {
-					console.error(data.error);
-					//do not change resuls incase of error
-					return;
-				}
-				setResults(data);
+			APIMethods.refreshIfFailed(() => {
+				const c = APIMethods.searchUser(query, (data) => {
+					if ("error" in data) {
+						console.error(data.error);
+						//do not change resuls incase of error
+						return;
+					}
+					setResults(data);
+				})
+				lastCall.current = c;
+				return c.promise;
 			});
-			lastCall.current = call;
 			canQuery.current = false;
 		}
 
