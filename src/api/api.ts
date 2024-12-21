@@ -109,8 +109,8 @@ export namespace API {
 			credentials: 'include',
 			signal: signal
 		})
-			.then((res) => {
-				const r = res.json();
+			.then(async (res) => {
+				const r = await res.json();
 				if ('error' in r) {
 					return { ...r, code: res.status };
 				}
@@ -777,7 +777,7 @@ export namespace APIMethods {
 		const r = await f();
 		if ('error' in r && r.code === 401) {
 			//lets try to refresh
-			const rr = await Authentication.refresh();
+			const rr = await Authentication.refresh(false, 'refreshIfFailed');
 			if (rr) {
 				//lets try to get the data again
 				return await f();
