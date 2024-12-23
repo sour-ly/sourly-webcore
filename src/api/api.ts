@@ -52,6 +52,7 @@ export namespace APITypes {
 		level: number;
 		currentExperience: number;
 		created_at: string;
+		hidden: boolean;
 		goals: Goal[];
 	};
 
@@ -459,14 +460,11 @@ namespace Online {
 	}
 
 	/* PROFILE STUFF */
-	export async function getProfile(uid: string | number): Promise<APITypes.User> {
+	export async function getProfile(uid: string | number): Promise<APITypes.User | APITypes.APIError> {
 		const r = await API.get<APITypes.User>(
 			`protected/user/${uid}/profile`,
 			header(),
 		);
-		if ('error' in r) {
-			throw new Error(r.message);
-		}
 		return r;
 	}
 
@@ -673,6 +671,7 @@ export namespace APIMethods {
 					name: skill.name,
 					level: skill.level,
 					currentExperience: skill.currentExperience,
+					hidden: skill.hidden,
 					goals: skill.goals.map((goal: APITypes.Goal) => ({
 						id: `${goal.id}`,
 						name: goal.name,
@@ -797,7 +796,16 @@ export namespace APIMethods {
 		const r = await f();
 		if ('error' in r && r.code === 401) {
 			//lets try to refresh
-			const rr = await Authentication.refresh(false, 'refreshIfFailed');
+			let tries = 0;
+			let rr = await Authentication.refresh(false, 'refreshIfFailed');
+			while (!rr && tries < 3) {
+				rr = await new Promise((resolve) => {
+					setTimeout(async () => {
+						resolve(await Authentication.refresh(false, 'refreshIfFailed'));
+					}, 500);
+				});
+				tries++;
+			}
 			if (rr) {
 				//lets try to get the data again
 				return await f();

@@ -26,22 +26,22 @@ function ProfilePage() {
 			};
 		} else {
 			//handle the case wherdasde we are given a uid
-			APIMethods.getProfile(uid).then((profile) => {
-				if (!profile) {
+			APIMethods.refreshIfFailed(() => APIMethods.getProfile(uid))
+				.then((profile) => {
+					if (!profile) {
+						//navigator('/');
+						return;
+					}
+					setProfile({ ...profile });
+				}).catch((e) => {
+					Log.log(e, 1, 'ProfilePage');
 					//navigator('/');
-					return;
-				}
-
-				setProfile({ ...profile });
-			}).catch((e) => {
-				Log.log(e, 1, 'ProfilePage');
-				//navigator('/');
-			});
+				});
 
 			return (() => {
 				setProfile(undefined);
 			});
-		}
+		};
 	}, []);
 
 	if (!profile_state) {

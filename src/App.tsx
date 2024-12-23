@@ -134,7 +134,6 @@ export default function App() {
 				Authentication.loginState.setState({
 					state: login,
 					callback: (state) => {
-						console.log("WTF:", state);
 						if (state.loginState.null) {
 							Authentication.logout();
 						}

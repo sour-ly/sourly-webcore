@@ -44,6 +44,7 @@ export type SkillProps = {
 	level?: number;
 	currentExperience?: number;
 	goals?: GoalProps[];
+	hidden?: boolean;
 };
 
 export default class Skill extends Eventful<EventMap> {
@@ -58,6 +59,7 @@ export default class Skill extends Eventful<EventMap> {
 		private level: number = 1,
 		private currentExperience: number = 0,
 		goals: Goal[] = [],
+		private hidden: boolean = false,
 	) {
 		super();
 		this.experienceRequired = this.calculateExperienceRequired(level);
@@ -209,10 +211,19 @@ export default class Skill extends Eventful<EventMap> {
 		return this.currentExperience / this.experienceRequired;
 	}
 
+	public get Hidden() {
+		return this.hidden;
+	}
+
 	/* setters */
 
 	public set Name(args: string) {
 		this.name = args;
+	}
+
+	// set if hidden
+	public set Hidden(args: boolean) {
+		this.hidden = args;
 	}
 
 	/* add goals -- this function is absorbable */
@@ -282,6 +293,7 @@ export default class Skill extends Eventful<EventMap> {
 			level: this.level,
 			currentExperience: this.currentExperience,
 			goals: this.goals.map((goal) => goal.toJSON()),
+			hidden: this.hidden,
 		};
 	}
 }
@@ -395,7 +407,7 @@ export abstract class SkillContainer<
 	}
 
 	public static castSkillFromJSON(skill: SkillProps) {
-		const n_skill = new Skill(skill.name, skill.level, skill.currentExperience);
+		const n_skill = new Skill(skill.name, skill.level, skill.currentExperience, [], skill.hidden);
 		n_skill.changeId(Number(skill.id ?? Identifiable.newId()));
 		if (skill.goals) {
 			for (const goal of skill.goals) {
@@ -426,6 +438,8 @@ export abstract class SkillContainer<
 		const fn = () => {
 			if (index !== -1 && new_skill.name) {
 				this.skills[index].Name = new_skill.name;
+				this.skills[index].Hidden = new_skill.hidden ?? false;
+				console.log('skillManager:updateSkill', 0, 'skill updated', this.skills[index]);
 				return true;
 			}
 		}

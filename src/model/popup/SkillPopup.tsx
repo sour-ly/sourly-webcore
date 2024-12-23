@@ -21,14 +21,13 @@ export function SkillPopupWrapper({
 	edit,
 	...props
 }: { tskill: SkillProps; edit?: boolean } & ButtonProps) {
-	const [skill, setSkill] = useState<SkillProps>(tskill);
+	const [skill, setSkill] = useState<SkillProps>({ ...tskill });
 	const change = useStateUtil(setSkill);
 	const ctx = useWindow();
 	const Plus = assets.getAsset('ui/plus');
 
 	function saveSkill() {
 		setSkill((o) => {
-			console.log('saveSkill', o);
 			if (edit) {
 				if (profileobj.updateSkill(Number(tskill.id ?? -1), { ...o }))
 					ctx.notification.notify(
@@ -40,7 +39,7 @@ export function SkillPopupWrapper({
 					if (r) ctx.notification.notify(`Skill ${o.name} created!`);
 				})();
 			}
-			return {};
+			return o;
 		});
 	}
 
@@ -50,12 +49,19 @@ export function SkillPopupWrapper({
 			type: 'save',
 			title: (edit && 'Edit Skill') || 'Add Skill',
 			content: () => (
-				<div>
+				<div className="add_skill_popup">
 					<Input
 						placeholder="Name"
 						onChange={(e) => change('name', e.currentTarget.value)}
 						value={skill.name}
 					/>
+					<Input
+						type="checkbox"
+						placeholder="Hide Skill from public? "
+						onChange={(e) => { change('hidden', e.currentTarget.checked ?? false) }}
+						value={skill.hidden}
+					/>
+
 				</div>
 			),
 			options: {

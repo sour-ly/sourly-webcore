@@ -68,7 +68,7 @@ namespace ProfileEvents {
 
 		export async function skillChanged({ skill, newSkill }: { skill: Skill, newSkill: SkillProps }) {
 			if (!newSkill) return true;
-			const r = await APIMethods.refreshIfFailed(() => APIMethods.saveSkills({ id: skill.Id, name: newSkill.name }, 'update'));
+			const r = await APIMethods.refreshIfFailed(() => APIMethods.saveSkills({ id: skill.Id, name: newSkill.name, hidden: newSkill.hidden }, 'update'));
 			if (r == true) return false;
 			if (!("error" in r)) {
 				if (Authentication.getOfflineMode()) {
