@@ -28,13 +28,12 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 			);
 
 			if (!(flags.getFlags() & SourlyFlags.SEEN_MIGRATION)) {
-				console.log('migration');
 				APIMethods.canMigrate(Authentication.loginState.state().userid).then((res) => {
 					if (res && !('error' in res)) {
 						if (res.status) {
 							ctx.popUp.open({
 								title: 'Migrate Account',
-								content: () => <p>It looks like you have offline data that can be migrated to the server. Would you like to migrate it now? Please note that once you make skills and goals you will not be able to migrate your account anymore. If you change your mind go to Settings and click Migrate Account</p>,
+								content: () => (<p>It looks like you have offline data that can be migrated to the server. Would you like to migrate it now? Please note that once you make skills and goals you will not be able to migrate your account anymore. If you change your mind go to Settings and click Migrate Account</p>),
 								type: 'confirm',
 								options: {
 									onOkay: () => {

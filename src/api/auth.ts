@@ -136,7 +136,7 @@ export namespace Authentication {
 
 	// expose the auth cookies
 	export const authCookies = () => {
-		document.cookie = '';
+		//document.cookie = '';
 		if (loginState.state().accessToken) {
 			setCookie('access_token', loginState.state()?.accessToken ?? '', 3600);
 		}
@@ -148,6 +148,7 @@ export namespace Authentication {
 			setCookie('refresh_token', loginState.state()?.refreshToken ?? '', 3600);
 		}
 		if (loginState.state().userid) {
+			console.log('setting user id:', loginState.state()?.userid ?? -1);
 			setCookie('user_id', (loginState.state()?.userid ?? -1).toString(), 3600);
 		}
 
