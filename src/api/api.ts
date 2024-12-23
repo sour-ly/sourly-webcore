@@ -798,6 +798,7 @@ export namespace APIMethods {
 			//lets try to refresh
 			let tries = 0;
 			let rr = await Authentication.refresh(false, 'refreshIfFailed');
+			//this is a bit of a hack, but try to refresh 3 times and see if it works - thanks a lot <ProtectedRoute />...
 			while (!rr && tries < 3) {
 				rr = await new Promise((resolve) => {
 					setTimeout(async () => {
