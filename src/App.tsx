@@ -134,6 +134,7 @@ export default function App() {
 				Authentication.loginState.setState({
 					state: login,
 					callback: (state) => {
+						console.log("WTF:", state);
 						if (state.loginState.null) {
 							Authentication.logout();
 						}
@@ -141,62 +142,64 @@ export default function App() {
 					},
 				});
 			}
-		}).finally(() => {
+		}).catch(e => {
+			console.error(e);
+		})
+			.finally(() => {
+				/* simply call the adjustTheme function */
+				adjustTheme();
 
-			/* simply call the adjustTheme function */
-			adjustTheme();
-
-			/* notification queue listeners */
-			x = notification_queue.on('update', (q) => {
-				setNotificationAmount(q.length);
-			});
-
-			// change the title of the document
-			window.document.title = `Sourly v${environment.version}`;
-			z = profileobj.on('profilelevelUp', (arg) => {
-				notify(`You have leveled up to level ${arg.level}`);
-			});
-			const flag = flags.getFlags();
-			/* flag checks */
-			if ((flag & SourlyFlags.NEW_PROFILE) ^ (flag & SourlyFlags.NO_SKILLS)) {
-				const message =
-					"Welcome to Sourly! We have detected that you don't have a profile, so we have created one for you! (Don't worry we have adjusted your profile to match your skills!)";
-				notify(message);
-			} else if (flag & SourlyFlags.NO_SKILLS) {
-			} else {
-				const message = 'Welcome back to Sourly!';
-				notify(message);
-			}
-			/* check if the user's version in the `storage.json` file is out of date, if so - present the user with the new patch notes and update their value */
-			// if flags & SEEN_WELCOME is 0, then show the welcome screen 0bx0xx & 0b0100 = 0b0000
-			if ((flag & SourlyFlags.SEEN_WELCOME) === 0) {
-				msg_queue.queue({
-					flags: flag,
-					pages: [WelcomePageSlideOneContext, WelcomePageSlideTwoContext],
-					onClose: () => {
-						setMsgContext(msg_queue.pop() ?? null);
-						flags.or(SourlyFlags.SEEN_WELCOME);
-					},
+				/* notification queue listeners */
+				x = notification_queue.on('update', (q) => {
+					setNotificationAmount(q.length);
 				});
-			}
-			storage.get('version').then((v) => {
-				if (!v || v !== version) {
+
+				// change the title of the document
+				window.document.title = `Sourly v${environment.version}`;
+				z = profileobj.on('profilelevelUp', (arg) => {
+					notify(`You have leveled up to level ${arg.level}`);
+				});
+				const flag = flags.getFlags();
+				/* flag checks */
+				if ((flag & SourlyFlags.NEW_PROFILE) ^ (flag & SourlyFlags.NO_SKILLS)) {
+					const message =
+						"Welcome to Sourly! We have detected that you don't have a profile, so we have created one for you! (Don't worry we have adjusted your profile to match your skills!)";
+					notify(message);
+				} else if (flag & SourlyFlags.NO_SKILLS) {
+				} else {
+					const message = 'Welcome back to Sourly!';
+					notify(message);
+				}
+				/* check if the user's version in the `storage.json` file is out of date, if so - present the user with the new patch notes and update their value */
+				// if flags & SEEN_WELCOME is 0, then show the welcome screen 0bx0xx & 0b0100 = 0b0000
+				if ((flag & SourlyFlags.SEEN_WELCOME) === 0) {
 					msg_queue.queue({
 						flags: flag,
-						pages: [VersionPageContext],
+						pages: [WelcomePageSlideOneContext, WelcomePageSlideTwoContext],
 						onClose: () => {
-							storage.save('version', version);
 							setMsgContext(msg_queue.pop() ?? null);
+							flags.or(SourlyFlags.SEEN_WELCOME);
 						},
 					});
 				}
+				storage.get('version').then((v) => {
+					if (!v || v !== version) {
+						msg_queue.queue({
+							flags: flag,
+							pages: [VersionPageContext],
+							onClose: () => {
+								storage.save('version', version);
+								setMsgContext(msg_queue.pop() ?? null);
+							},
+						});
+					}
+				});
+
+				/* these are enqueued messages */
+
+				/* start the message queue */
+				setMsgContext(msg_queue.pop() ?? null);
 			});
-
-			/* these are enqueued messages */
-
-			/* start the message queue */
-			setMsgContext(msg_queue.pop() ?? null);
-		});
 
 		return () => {
 			if (z) {

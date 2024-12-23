@@ -7,6 +7,7 @@ import { profileobj, SourlyFlags } from '../index';
 import Queue from '../util/queue';
 import { Stateful } from '../util/state';
 import { Authentication, LoginState } from './auth';
+import { CredentialResponse } from '@react-oauth/google';
 
 export namespace APITypes {
 	export type APIError = {
@@ -182,6 +183,21 @@ export namespace API {
 		};
 	}
 
+	export async function loginWithGoogle(googleResponse: CredentialResponse): Promise<LoginState | APITypes.APIError> {
+		const r = await get<APITypes.LoginResponse>(`auth/login/google/web?code=${googleResponse.credential}`, {});
+		if ('error' in r) {
+			return r;
+		}
+		return {
+			null: false,
+			userid: r.user_id,
+			offline: false,
+			username: '',
+			accessToken: r.accessToken,
+			refreshToken: r.refreshToken,
+		};
+	}
+
 	export async function refresh(
 		headers: HeadersInit,
 	): Promise<APITypes.RefreshResponse | APITypes.APIError> {
@@ -264,6 +280,10 @@ namespace Offline {
 
 	export async function getLoginState(): Promise<LoginState> {
 		return new Promise(async (resolve) => {
+			if (!storage) {
+				Log.log('storage:request', 1, 'storage is not defined');
+				return resolve({ null: true, username: '', offline: true });
+			}
 			const arg = await storage.get('login');
 			const data = arg;
 			if (!data || Object.keys(data).length === 0) {

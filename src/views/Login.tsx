@@ -3,11 +3,13 @@ import { Authentication } from '../api/auth';
 import { Button } from '../components/Button';
 import Input from '../components/Input';
 import './styles/login.scss';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useWindow } from '../App';
 import { useStateUtil } from '../util/state';
 import { GoogleLogin } from '@react-oauth/google';
 import { Link } from '../util/link';
+import { api } from '..';
+import { Electron } from '../util/electron';
 
 export function OfflinePopup() {
 	return (
@@ -30,6 +32,8 @@ export function Login() {
 	const [inputData, setInputData] = useState({ username: '', password: '' });
 	const [loading, setLoading] = useState(false);
 	const update = useStateUtil(setInputData);
+	const queryParams = new URLSearchParams(window.location.search)
+
 
 	useEffect(() => {
 		const x = async () => {
@@ -48,6 +52,55 @@ export function Login() {
 				// logged in
 			}
 		});
+
+		const e = {
+			token: queryParams.get('token'),
+			refresh_token: queryParams.get('refresh_token'),
+			user_id: queryParams.get('user_id'),
+			error: queryParams.get('error'),
+			code: queryParams.get('code'),
+			message: queryParams.get('message'),
+		};
+
+		if (e.token && e.refresh_token && e.user_id) {
+			Authentication.absorbTokens(e.token, e.refresh_token, e.user_id).then(r => {
+				if ("error" in r) {
+					ctx.popUp.open({
+						type: 'dialog',
+						title: 'Login Error',
+						content: () => <p>There was an error with using Google to Login. We are sorry about the inconvience.</p>,
+						options: {
+							onOkay: () => {
+								ctx.popUp.close();
+							},
+							onCancel: () => {
+								ctx.popUp.close();
+							},
+						},
+					})
+				} else {
+					//just do nothing, let some component listen to us
+					navigation('/');
+					window.location.search = '';
+				}
+			});
+			//refresh
+		} else if (e.error && e.code && e.message) {
+			//error
+			ctx.popUp.open({
+				type: 'dialog',
+				title: 'Login Error',
+				content: () => <p>{e.message}</p>,
+				options: {
+					onOkay: () => {
+						ctx.popUp.close();
+					},
+					onCancel: () => {
+						ctx.popUp.close();
+					},
+				},
+			})
+		}
 
 		return () => {
 			Authentication.off('loginStateChange', z);
@@ -142,7 +195,7 @@ export function Login() {
 					<Button type="solid" onClick={login}>
 						Login
 					</Button>
-					<Button type="outline" onClick={() => Link.NewTab('http://localhost:3000/api/v1/auth/login/google')}>
+					<Button type="outline" onClick={() => Link.NewTab(api.endpoint + `/api/v1/auth/login/google?source=${Electron.isUsingElectron() ? 'electron' : 'web'}`)}>
 						Login using Google
 					</Button>
 					<Button type="outline" onClick={offlineMode}>

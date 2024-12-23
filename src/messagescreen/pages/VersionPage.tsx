@@ -7,7 +7,7 @@ export function VersionPage() {
 			<div className="messagescreen__content__main__body__section">
 				<h2>Whats New?:</h2>
 				<p>
-					Welcome to the new 0.1.0 version of Sourly! This version changes a lot and adds a bit more to the application. This leap forward is pivotal in the development of the application, and I hope you enjoy the new features that have been added.
+					Welcome to the new 0.1.1 version of Sourly! This version changes a lot and adds a bit more to the application. This leap forward is pivotal in the development of the application, and I hope you enjoy the new features that have been added.
 				</p>
 				<p>
 					First and foremost, the addition of the backend API is a huge step forward in the development of the application. This will allow the application to be more dynamic and allow for more features to be added in the future. This allows us to sync our data with multiple devices, and allows us to have a more robust system for the application. This also opens the door for more API-like features, such as a websocket notification system, social features, inventory, and more.
