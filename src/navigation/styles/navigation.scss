@@ -5,15 +5,14 @@ nav.navigation {
   left: 50%;
   top: 1.5rem;
   transform: translateX(-50%);
-  background: var(--navigation-bar-track-color);
-  border-radius: 2rem;
   z-index: 99;
   width: fit-content;
   padding: .1rem;
   display: flex;
   gap: .25rem;
 
-  transition: opacity 0.3s;
+
+  transition: all 0.3s;
 
   &:hover {
     opacity: 1;
@@ -25,6 +24,47 @@ nav.navigation {
     &__row {
       width: fit-content;
       display: flex;
+      background: var(--navigation-bar-track-color);
+      border-radius: 2rem;
+      position: relative;
+
+      &__buttons {
+        position: absolute;
+        left: 105%;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        gap: .5rem;
+
+        &__button {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--navigation-bar-track-color);
+          padding: .35rem;
+          border-radius: 2rem;
+          width: 16px;
+          height: 16px;
+          transition: background 0.3s;
+
+          &:hover {
+            background: var(--navigation-bar-button-hover-color);
+            cursor: pointer;
+          }
+
+          &.active {
+            background: var(--navigation-bar-button-hover-color);
+          }
+
+          img {
+            padding: 0;
+            max-width: 14px;
+            height: auto;
+            filter: var(--navigation-bar-button-small-filter);
+            transition: filter 0.3s;
+          }
+        }
+      }
     }
   }
 
@@ -55,6 +95,7 @@ nav.navigation {
       top: .025rem;
       --spot: 0;
       left: calc(var(--width) * var(--spot) + .05rem);
+      opacity: var(--disable);
       transition: all 0.3s;
       z-index: 101;
       //disable all cursor events

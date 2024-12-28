@@ -113,6 +113,10 @@
   --navigation-bar-button-hover-color-dark: #3f3f3f;
   --navigation-bar-button-border-color-dark: #4f4f4f;
 
+  --navigation-bar-button-small-filter-hover-dark: invert(100%) sepia(4%) saturate(7457%) hue-rotate(291deg) brightness(103%) contrast(111%);
+  --navigation-bar-button-small-filter-hover-light: invert(0%) sepia(12%) saturate(1172%) hue-rotate(173deg) brightness(101%) contrast(99%);
+  --navigation-bar-button-small-filter-dark: invert(99%) sepia(5%) saturate(77%) hue-rotate(321deg) brightness(111%) contrast(91%);
+  --navigation-bar-button-small-filter-light: invert(0%) sepia(24%) saturate(1659%) hue-rotate(226deg) brightness(104%) contrast(85%);
 
   //navigation defaults
   --navigation-bar-top: 1.5rem;
@@ -120,6 +124,11 @@
   --navigation-bar-button-color: var(--navigation-bar-button-color-light);
   --navigation-bar-button-hover-color: var(--navigation-bar-button-hover-color-light);
   --navigation-bar-button-border-color: var(--navigation-bar-button-border-color-light);
+
+  //filter to invert 
+  --navigation-bar-button-small-filter: var(--navigation-bar-button-small-filter-light);
+  --navigation-bar-button-small-filter-hover: var(--navigation-bar-button-small-filter-hover-light);
+
 
   //divider line
   --divider-color-light: #e8e8e8;
@@ -179,6 +188,7 @@
   --option-filter: var(--option-filter-light);
 
 
+
   //z-index book
   font-family: 'Inter',
   sans-serif;
@@ -217,6 +227,9 @@
   --navigation-bar-button-color: var(--navigation-bar-button-color-dark);
   --navigation-bar-button-hover-color: var(--navigation-bar-button-hover-color-dark);
   --navigation-bar-button-border-color: var(--navigation-bar-button-border-color-dark);
+  --navigation-bar-button-small-filter: var(--navigation-bar-button-small-filter-dark);
+  --navigation-bar-button-small-filter-hover: var(--navigation-bar-button-small-filter-hover-dark);
+
 
   //profile detail card
   --profile-detail-card-bg: var(--profile-detail-card-bg-dark);
