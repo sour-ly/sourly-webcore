@@ -16,6 +16,16 @@ export namespace APITypes {
 		code: number;
 	};
 
+	export type Notification = {
+		id: number;
+		type: 'newfollow' | 'newmessage' | 'levelup';
+		from: number;
+		to: number;
+		content: string;
+		seen: boolean;
+		created_at: string;
+	}
+
 	export type LoginResponse = {
 		user_id: number;
 		accessToken: string;
