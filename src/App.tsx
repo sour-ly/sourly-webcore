@@ -393,9 +393,7 @@ export default function App() {
 									<Route
 										path="/settings"
 										element={
-											<ProtectedRoute>
-												<Settings />
-											</ProtectedRoute>
+											<Settings />
 										}
 									/>
 								</Routes>

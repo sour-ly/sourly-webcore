@@ -143,11 +143,11 @@ function Navigator() {
 					)}
 			</div>
 			<div className="navigation__row__buttons">
-				<LinkImage href="/settings" src={assets.getAsset('ui/gear')} alt="home" on={current === '/settings'} />
 				{Authentication.getLoggedIn() && (
 					<LinkImage href="/profile" src={assets.getAsset('ui/user')} alt="home" on={current === '/profile'} />
 				)
 				}
+				<LinkImage href="/settings" src={assets.getAsset('ui/gear')} alt="home" on={current === '/settings'} />
 			</div>
 		</nav>
 	);
