@@ -16,6 +16,11 @@ export namespace APITypes {
 		code: number;
 	};
 
+	export type FollowResponse = {
+		success: true,
+		message: string
+	}
+
 	export type Notification = {
 		id: number;
 		type: 'newfollow' | 'newmessage' | 'levelup';
@@ -332,6 +337,7 @@ namespace Offline {
 					const json = data as any;
 					const npfp = new Profile(
 						json.name,
+						'', //username
 						json.level,
 						json.currentExperience,
 						[],
@@ -488,6 +494,7 @@ namespace Online {
 		if (!profileobj.state) {
 			throw new Error('profile object is still undefined');
 		}
+		profileobj.state.Username = user_obj.username;
 		profileobj.state.NameEventless = user_obj.name;
 		profileobj.state.Level = user_obj.level;
 		profileobj.state.CurrentExperience = user_obj.currentExperience;
@@ -603,6 +610,44 @@ namespace Online {
 			header(),
 		);
 	}
+
+	/* following stuff */
+
+	export async function followUser(uid: number) {
+		return await API.get<APITypes.FollowResponse | APITypes.APIError>(
+			`protected/user/${uid}/follow`,
+			header(),
+		);
+	}
+
+	export async function unfollowUser(uid: number) {
+		return await API.get<APITypes.FollowResponse | APITypes.APIError>(
+			`protected/user/${uid}/unfollow`,
+			header(),
+		);
+	}
+
+	export async function getFollowers(uid: number) {
+		return await API.get<APITypes.User[]>(
+			`protected/user/${uid}/followers`,
+			header(),
+		);
+	}
+
+	export async function getFollowing(uid: number) {
+		return await API.get<APITypes.User[]>(
+			`protected/user/${uid}/following`,
+			header(),
+		);
+	}
+
+	export async function isFollowing(uid: number) {
+		return await API.get<{ following: boolean } | APITypes.APIError>(
+			`protected/user/${uid}/isfollowing`,
+			header(),
+		);
+	}
+
 
 
 }
@@ -884,6 +929,31 @@ export namespace APIMethods {
 		return { ...apiResponse, profile: { ...oProfile.serialize(), skills } };
 	}
 
+	/* follow stuff */
+
+	export async function followUser(uid: number) {
+		if (Authentication.getOfflineMode()) {
+			return true;
+		}
+		return API.queueAndWait(() => Online.followUser(uid), 'followUser');
+	}
+
+	export async function unfollowUser(uid: number) {
+		if (Authentication.getOfflineMode()) {
+			return true;
+		}
+		return API.queueAndWait(() => Online.unfollowUser(uid), 'unfollowUser');
+	}
+
+	export async function isFollowing(uid: number) {
+		if (Authentication.getOfflineMode()) {
+			return false;
+		}
+		return await API.queueAndWait(() => Online.isFollowing(uid), 'isFollowing');
+	}
+
+
+	/* migration stuff */
 	export async function migrate(uid: string | number, profile: ProfileProps & { skills: SkillProps[] }) {
 		if (Authentication.getOfflineMode()) {
 			return { error: 'offline-mode', message: 'Cannot migrate in offline mode' };

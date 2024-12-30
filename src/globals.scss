@@ -39,7 +39,7 @@
   //activity
   --progress-bar-height: 0.3571rem;
   --progress-bar-track: #525252;
-  --progress-bar-fill: var(--accent);
+  --progress-bar-fill: #FF8057;
   --activity-width: 18.7143rem;
   --activity-title-font-size: 1.9286rem;
   --activity-title-weight: 500;
@@ -177,9 +177,16 @@
   --profile-detail-card-bg-dark: #1e1e1e;
   --profile-detail-card-border-light: #e8e8e8;
   --profile-detail-card-border-dark: #333;
+  --profile-detail-card-username-dark: #4b4b4b;
+  --profile-detail-card-username-light: #c4c4c4;
+  --profile-detail-card-level-ring-dark: #ffffff;
+  --profile-detail-card-level-ring-light: #000000;
+
   //defaults
   --profile-detail-card-bg: var(--profile-detail-card-bg-light);
   --profile-detail-card-border: var(--profile-detail-card-border-light);
+  --profile-detail-card-username: var(--profile-detail-card-username-light);
+  --profile-detail-card-level-ring: var(--profile-detail-card-level-ring-light);
 
   //option
   --option-filter-light: invert(0%) sepia(96%) saturate(3968%) hue-rotate(255deg) brightness(99%) contrast(100%);
@@ -234,6 +241,8 @@
   //profile detail card
   --profile-detail-card-bg: var(--profile-detail-card-bg-dark);
   --profile-detail-card-border: var(--profile-detail-card-border-dark);
+  --profile-detail-card-username: var(--profile-detail-card-username-dark);
+  --profile-detail-card-level-ring: var(--profile-detail-card-level-ring-dark);
 
   //option
   --option-filter: var(--option-filter-dark);

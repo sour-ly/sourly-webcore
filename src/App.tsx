@@ -33,6 +33,7 @@ import { Signup } from './views/Signup';
 import UserSearch from './views/UserSearch';
 import { Electron } from './util/electron';
 import IPC from './ReactIPC';
+import { SourlyWebSocket } from './api/ws';
 
 export type WindowContextType = {
 	popUp: WindowPopUp;
@@ -200,12 +201,20 @@ export default function App() {
 				setMsgContext(msg_queue.pop() ?? null);
 			});
 
+		//attach websocket
+		const ws1 = SourlyWebSocket.on('onNotification', ({ data }) => {
+			notify(data.content)
+		});
+
 		return () => {
 			if (z) {
 				profileobj.off('onUpdates', z);
 			}
 			if (x) {
 				notification_queue.off('update', x);
+			}
+			if (ws1) {
+				SourlyWebSocket.off('onNotification', ws1);
 			}
 		};
 	}, []);

@@ -12,7 +12,9 @@ type SkillEventMapOverride = {
 } & Omit<SkillEventMap, 'onUpdates'>;
 
 export interface ProfileSkeleton {
+	id: number;
 	name: string;
+	username: string;
 	level: number;
 	currentExperience: number;
 	version: string;
@@ -341,6 +343,7 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
 
 	constructor(
 		private name: string = 'User',
+		private username: string = '',
 		level?: number,
 		currentExperience?: number,
 		skills?: Skill[],
@@ -471,6 +474,15 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
 		this.currentExperience = currentExperience;
 	}
 
+
+	get Username() {
+		return this.username;
+	}
+
+	set Username(username: string) {
+		this.username = username;
+	}
+
 	get Level() {
 		return this.level;
 	}
@@ -505,7 +517,9 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
 
 	public serialize() {
 		return {
+			id: this.Id,
 			name: this.name,
+			username: this.username,
 			level: this.level,
 			currentExperience: this.currentExperience,
 			version: this.version,
