@@ -45,7 +45,7 @@ function ProfilePage() {
 	const [searchParams] = useSearchParams();
 	const [profile_state, setProfile] = useState<ProfileSkeleton>();
 	const [loading_state, setLoadingState] = useState<ProfilePageLoadingState>(DEFAULT_LOADING_STATE);
-	const changeProfile = useStateUtil(setProfile);
+	//const changeProfile = useStateUtil(setProfile);
 	const setLoading = useStateUtil(setLoadingState);
 	const uid = searchParams.get('uid');
 
@@ -104,14 +104,22 @@ function ProfilePage() {
 					setLoading('followers', { loading: false, value: res.length });
 				}).catch((e) => {
 					setLoading('followers', { loading: false, value: -1 });
-				});
-			/* get the following */
-			APIMethods.refreshIfFailed(() => APIMethods.getFollowing(pfState.id))
-				.then((res) => {
-					setLoading('following', { loading: false, value: res.length });
-				}).catch((e) => {
-					setLoading('following', { loading: false, value: -1 });
-				});
+				}).then(() => {
+					;
+					/* get the following */
+					APIMethods.refreshIfFailed(() => APIMethods.getFollowing(pfState.id))
+						.then((res) => {
+							setLoading('following', { loading: false, value: res.length });
+						}).catch((e) => {
+							setLoading('following', { loading: false, value: -1 });
+						});
+				}).finally(() => {
+					setLoading('skills', { loading: false, value: pfState.skills.length });
+				});;
+		} else {
+			setLoading('skills', { loading: false, value: pfState.skills.length });
+			setLoading('followers', { loading: false, value: -1 });
+			setLoading('following', { loading: false, value: -1 });
 		}
 	}
 
@@ -121,13 +129,12 @@ function ProfilePage() {
 
 	return (
 		<main style={{ maxWidth: '896px', width: '896px' }}>
-			<h1 style={{ marginBottom: '1rem' }}>{!uid || uid === `${profileobj.Id}` ? 'Your' : `${profile_state.name}'s`} Profile</h1>
 			<ProductDetailCard profile_obj={profile_state} editable={!uid || uid === `${profileobj.Id}`} setProfile={setLoading} extraData={loading_state} />
 			<div className="profile-page__content">
 				<div className="profile-page__content__section">
-					<div className="profile-page__content__section__box one card">
+					<div className={`profile-page__content__section__box one card ${loading_state.followers.loading && 'loading'}`}>
 						<span>Skills</span>
-						<h2>10</h2>
+						<h2>{loading_state.skills.value ?? ''}</h2>
 					</div>
 					<div className={`profile-page__content__section__box one card ${loading_state.followers.loading && 'loading'}`}>
 						<span>Followers</span>
@@ -140,7 +147,7 @@ function ProfilePage() {
 				</div>
 				<div className="profile-page__content__section">
 					<ProfileTopSkillCard profile_obj={profile_state} setProfile={setLoading} extraData={loading_state} />
-					<ProfileSkillCard profile_obj={profile_state} setProfile={setLoading} extraData={loading_state} />
+					<ProfileSkillCard skills={profile_state.skills ?? []} setProfile={setLoading} extraData={loading_state} />
 				</div>
 			</div>
 		</main>

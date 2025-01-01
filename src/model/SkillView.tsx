@@ -30,15 +30,17 @@ const sort_goals_by_completion = (
 export function SkillView({
 	skill,
 	skills,
+	staticView = false,
 }: {
 	skill: Skill;
 	skills: Skill[];
+	staticView?: boolean;
 }) {
 	const [collapsed, setCollapsed] = useState(true);
 	const collapse_ref = useRef<HTMLDivElement>(null);
 	const ctx = useWindow();
 	const skillEdit = SkillPopupWrapper({
-		tskill: { ...skill.toJSON(), id: `${Number(skill.Id) ?? -1}` },
+		tskill: { ...skill?.toJSON(), id: `${Number(skill.Id) ?? -1}` },
 		edit: true,
 	});
 	const options = useRef([
@@ -51,6 +53,7 @@ export function SkillView({
 	]);
 
 	useEffect(() => {
+		if (staticView) return;
 		const i = skill.on('levelUp', async (args) => {
 			ctx.notification.notify({
 				message: `You have leveled up ${skill.Name} to level ${args.level}`,
@@ -93,10 +96,13 @@ export function SkillView({
 						{skill.Name} {toRomanNumerals(skill.Level)}:{' '}
 						{truncateDecimal(skill.CurrentExperience, 1)} EXP
 					</h2>
-					<OptionDropdown
-						options={options.current}
-						className="skillview__dot_container"
-					/>
+
+					{!staticView &&
+						<OptionDropdown
+							options={options.current}
+							className="skillview__dot_container"
+						/>
+					}
 				</div>
 				<ProgressBar
 					max={skill.ExperienceRequired}
@@ -112,13 +118,15 @@ export function SkillView({
 				<div className="skillview__goals scrollbar horizontal slight">
 					<div className="skillview__goals__container">
 						{skill.Goals.sort(sort_goals_by_completion).map((goal) => {
-							return <GoalView key={goal.Id} skill_id={skill.Id} goal={goal} />;
+							return <GoalView key={goal.Id} skill_id={skill.Id} goal={goal} staticView={staticView} />;
 						})}
 					</div>
 				</div>
-				<div className="skillview__footer">
-					<GoalPopUpWrapper skill={skill} />
-				</div>
+				{!staticView &&
+					<div className="skillview__footer">
+						<GoalPopUpWrapper skill={skill} />
+					</div>
+				}
 			</div>
 		</div>
 	);

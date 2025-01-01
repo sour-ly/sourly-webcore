@@ -259,7 +259,34 @@ export namespace API {
 			fn: AsyncFunction,
 			src: string = '',
 		): ReturnType<AsyncFunction> {
-			const fnc = { fn, id: APIQueue.genID() };
+
+			const fnc = {
+				fn: () => new Promise(async (resolve) => {
+					let errorful = false;
+					//set a timeout for 10 seconds
+					const t = setTimeout(() => {
+						//resolve forcefully with an error
+						errorful = true;
+						resolve({
+							error: 'timeout',
+							message: 'Request Timed Out',
+							code: 408
+						});
+						Log.log('api:request', 2, 'Request Timed Out', src);
+					}, 10000);
+					const r = await fn();
+					//resolve the promise as normal
+					clearTimeout(t);
+					if (errorful) {
+						return { error: 'timeout', message: 'Request Timed Out', code: 408 };
+					}
+					if (r == undefined) {
+						console.log('undefined response from %s', src);
+					}
+					resolve(r);
+				}) as Promise<any | APITypes.APIError>,
+				id: APIQueue.genID()
+			};
 
 			const promise = new Promise((resolve) => {
 				this.once('pop', async (data) => {
@@ -271,6 +298,7 @@ export namespace API {
 				});
 			});
 			this.queue(fnc);
+
 			//console.log('[queueAndWait] Queued %s from %s', fn, src);
 			return await promise;
 		}
@@ -851,7 +879,7 @@ export namespace APIMethods {
 		await API.queueAndWait(async () => { }, 'refreshIfFailed');
 		//first lets try to get the data
 		const r = await f();
-		if ('error' in r && r.code === 401) {
+		if ('error' in r && r.code === 401 && r.error !== 'permission-denied') {
 			//lets try to refresh
 			let tries = 0;
 			let rr = await Authentication.refresh(false, 'refreshIfFailed');

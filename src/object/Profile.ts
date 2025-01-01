@@ -15,6 +15,7 @@ export interface ProfileSkeleton {
 	id: number;
 	name: string;
 	username: string;
+	skills?: SkillProps[];
 	level: number;
 	currentExperience: number;
 	version: string;
@@ -519,6 +520,7 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
 		return {
 			id: this.Id,
 			name: this.name,
+			skills: this.skills.map(skill => skill.toJSON()),
 			username: this.username,
 			level: this.level,
 			currentExperience: this.currentExperience,
