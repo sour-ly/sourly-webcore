@@ -24,15 +24,21 @@
         position: absolute;
         display: flex;
         align-items: center;
+        justify-content: center;
         padding: .5rem;
+        aspect-ratio: 1 / 1;
+        //this should be a box but the size should adjust to the content
         border-radius: 50%;
-        aspect-ratio: 1;
         border: 3px solid var(--profile-detail-card-level-ring);
         box-sizing: border-box;
         right: 0;
         top: 0;
         font-size: 1.3750rem;
         font-weight: 600;
+
+        span {
+          transform: translateX(0.07rem);
+        }
       }
 
       &__name {

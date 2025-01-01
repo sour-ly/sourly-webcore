@@ -847,6 +847,8 @@ export namespace APIMethods {
 		if (Authentication.getOfflineMode()) {
 			return f();
 		}
+		//wrap everything in a queue
+		await API.queueAndWait(async () => { }, 'refreshIfFailed');
 		//first lets try to get the data
 		const r = await f();
 		if ('error' in r && r.code === 401) {
@@ -864,6 +866,7 @@ export namespace APIMethods {
 			}
 			if (rr) {
 				//lets try to get the data again
+				console.log('refreshed');
 				return await f();
 			}
 		} else {
@@ -950,6 +953,22 @@ export namespace APIMethods {
 			return false;
 		}
 		return await API.queueAndWait(() => Online.isFollowing(uid), 'isFollowing');
+	}
+
+	//get followers
+	export async function getFollowers(uid: number) {
+		if (Authentication.getOfflineMode()) {
+			return [];
+		}
+		return await API.queueAndWait(() => Online.getFollowers(uid), 'getFollowers');
+	}
+
+	//get following
+	export async function getFollowing(uid: number) {
+		if (Authentication.getOfflineMode()) {
+			return [];
+		}
+		return await API.queueAndWait(() => Online.getFollowing(uid), 'getFollowing');
 	}
 
 

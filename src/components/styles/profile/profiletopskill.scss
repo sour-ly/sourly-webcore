@@ -1,0 +1,59 @@
+.profile-top-skill-card {
+  height: var(--profile-skill-card-height);
+  flex: .6;
+  width: 100%;
+
+  h2 {
+    font-size: 1.6250rem;
+    font-weight: 600;
+    margin-top: 0.8rem;
+  }
+
+  &__stats {
+    margin-top: .75rem;
+    padding: 0 0.6875rem;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-y: auto;
+    max-height: 12.7500rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    &__stat,
+    .profile-top-skill-card__stats__stat {
+      width: 100%;
+      min-height: 2.8125rem;
+      padding: 0.5000rem 0.6875rem;
+      box-sizing: border-box;
+      flex-shrink: 0;
+
+      &.xp {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.2rem;
+
+        span {
+          margin-top: 0rem;
+          font-size: 0.7500rem;
+        }
+      }
+
+      h2 {
+        font-size: 0.6875rem;
+        margin: 0;
+        color: var(--profile-detail-card-username);
+      }
+
+      span {
+        display: block;
+        font-size: 0.6875rem;
+        color: var(--text-color) !important;
+        font-weight: 500;
+        margin-top: 0.4rem;
+      }
+    }
+  }
+
+}

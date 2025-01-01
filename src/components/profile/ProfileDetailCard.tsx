@@ -8,6 +8,7 @@ import { Authentication } from '../../api/auth';
 import { Button } from '../Button';
 import { useEffect, useState } from 'react';
 import { API, APIMethods } from '../../api/api';
+import { ProfilePageLoadingState, ProfilePageModifyState } from '../../views/Profile';
 
 
 function ProfilePicture() {
@@ -56,9 +57,9 @@ export function getLevelText(level: number): string {
 type ProductDetailCard = {
 	profile_obj: ProfileSkeleton;
 	editable?: boolean;
-};
+} & ProfilePageModifyState;
 
-function ProductDetailCard({ profile_obj, editable }: ProductDetailCard) {
+function ProductDetailCard({ profile_obj, editable, setProfile, extraData }: ProductDetailCard) {
 	const profile = profileobj;
 	const [followButtonLoading, setFollowButtonLoading] = useState(true);
 	const [alreadyFollowing, setAlreadyFollowing] = useState(false);
@@ -80,10 +81,12 @@ function ProductDetailCard({ profile_obj, editable }: ProductDetailCard) {
 		APIMethods.refreshIfFailed(() => APIMethods.followUser(profile_obj.id)).then((res) => {
 			if (res) {
 				setAlreadyFollowing(true);
+				if (setProfile && extraData && extraData.followers.loading === false)
+					setProfile && setProfile('followers', { ...extraData.followers, value: extraData.followers.value + 1 });
 				//success
 			}
 		}).catch((e) => {
-			console.log(e);
+			//@TODO handle error
 			//error
 		})
 	}
@@ -92,10 +95,13 @@ function ProductDetailCard({ profile_obj, editable }: ProductDetailCard) {
 		APIMethods.refreshIfFailed(() => APIMethods.unfollowUser(profile_obj.id)).then((res) => {
 			if (res) {
 				setAlreadyFollowing(false);
+				if (setProfile && extraData && extraData.followers.loading === false) {
+					setProfile('followers', { ...extraData.followers, value: extraData.followers.value - 1 });
+				}
 				//success
 			}
 		}).catch((e) => {
-			console.log(e);
+			//@TODO handle error
 			//error
 		})
 	}

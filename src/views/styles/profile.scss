@@ -1,0 +1,59 @@
+@keyframes loading {
+  0% {
+    opacity: 0.1;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+
+.loading {
+  animation: loading 1s infinite alternate;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: forwards;
+}
+
+.profile-page__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7500rem;
+
+  &__section {
+    display: flex;
+    gap: 0.7500rem;
+
+    &__box,
+    .profile-page__content__section__box {
+      border-radius: 9px !important;
+      opacity: 1;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+
+      padding-top: 0.3625rem;
+      box-sizing: border-box;
+
+      span {
+        font-size: 0.8200rem;
+        color: var(--profile-detail-card-username);
+        font-weight: 500;
+      }
+
+      &.one {
+        flex: 1;
+        height: 4.7500rem;
+
+
+
+        h2 {
+          font-size: 2.5000rem;
+          font-weight: 600;
+          margin-top: -.1rem;
+        }
+
+      }
+    }
+  }
+}
