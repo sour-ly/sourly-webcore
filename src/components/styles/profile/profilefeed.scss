@@ -6,6 +6,10 @@
   &__posts {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    padding: 0 0.8750rem;
+    box-sizing: border-box;
     gap: 0.2000rem;
+
   }
 }

@@ -98,31 +98,27 @@ function ProfilePage() {
 
 
 
-	function sync(pfState?: ProfileSkeleton) {
+	async function sync(pfState?: ProfileSkeleton) {
 		if (pfState && !Authentication.getOfflineMode()) {
 			/* get the followers */
-			APIMethods.refreshIfFailed(() => APIMethods.getFollowers(pfState.id))
-				.then((res) => {
-					console.log(res);
-					setLoading('followers', { loading: false, value: res.length });
-				}).catch((e) => {
-					setLoading('followers', { loading: false, value: -1 });
-				}).then(() => {
-					;
-					/* get the following */
-					APIMethods.refreshIfFailed(() => APIMethods.getFollowing(pfState.id))
-						.then((res) => {
-							setLoading('following', { loading: false, value: res.length });
-						}).catch((e) => {
-							setLoading('following', { loading: false, value: -1 });
-						});
-				}).finally(() => {
-					setLoading('skills', { loading: false, value: pfState.skills.length });
-				});;
+			let res = await APIMethods.refreshIfFailed(() => APIMethods.getFollowers(pfState.id))
+			setLoading('followers', { loading: false, value: res.length });
+			/* get the following */
+			res = await APIMethods.refreshIfFailed(() => APIMethods.getFollowing(pfState.id))
+			setLoading('following', { loading: false, value: res.length });
+			res = await APIMethods.getPosts(pfState.id).finally(() => {
+				setLoading('skills', { loading: false, value: pfState.skills.length });
+			});
+			setLoading('feed', { loading: false, value: res.posts });
+
+			/* get the skills */
+
+
 		} else {
 			setLoading('skills', { loading: false, value: pfState.skills.length });
 			setLoading('followers', { loading: false, value: -1 });
 			setLoading('following', { loading: false, value: -1 });
+			setLoading('feed', { loading: false, value: [] });
 		}
 	}
 

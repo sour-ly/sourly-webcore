@@ -15,9 +15,7 @@ export function ProfileFeedCard({ profile_obj, setProfile, extraData }: ProfileF
 	useEffect(() => {
 		/* grab the feed */
 		if (profile_obj) {
-			APIMethods.getPosts(profile_obj.id).then((posts) => {
-				setProfile('feed', { loading: false, value: posts.posts });
-			});
+
 		}
 	}, [profile_obj]);
 
