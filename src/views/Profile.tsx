@@ -3,13 +3,14 @@ import { ProfileSkeleton } from '../object/Profile';
 import { profileobj } from '..';
 import ProductDetailCard from '../components/profile/ProfileDetailCard';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { APIMethods } from '../api/api';
+import { APIMethods, APITypes } from '../api/api';
 import { Log } from '../log/log';
 import './styles/profile.scss';
 import { useStateUtil } from '../util/state';
 import { Authentication } from '../api/auth';
 import { ProfileTopSkillCard } from '../components/profile/ProfileTopSkillCard';
 import { ProfileSkillCard } from '../components/profile/ProfileSkillsCard';
+import { ProfileFeedCard } from '../components/profile/ProfileFeedCard';
 
 
 type LoadState<V> = {
@@ -23,6 +24,7 @@ export type ProfilePageLoadingState = {
 	skills: LoadState<number>,
 	followers: LoadState<number>,
 	following: LoadState<number>,
+	feed: LoadState<APITypes.FeedPost[]>,
 }
 
 export type ProfilePageModifyState = {
@@ -36,6 +38,7 @@ const DEFAULT_LOADING_STATE: ProfilePageLoadingState = {
 	skills: { loading: true },
 	followers: { loading: true },
 	following: { loading: true },
+	feed: { loading: true },
 }
 
 
@@ -148,6 +151,9 @@ function ProfilePage() {
 				<div className="profile-page__content__section">
 					<ProfileTopSkillCard profile_obj={profile_state} setProfile={setLoading} extraData={loading_state} />
 					<ProfileSkillCard skills={profile_state.skills ?? []} setProfile={setLoading} extraData={loading_state} />
+				</div>
+				<div className="profile-page__content__section">
+					<ProfileFeedCard profile_obj={profile_state} setProfile={setLoading} extraData={loading_state} />
 				</div>
 			</div>
 		</main>

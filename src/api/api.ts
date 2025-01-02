@@ -21,6 +21,15 @@ export namespace APITypes {
 		message: string
 	}
 
+	export type FeedPost = {
+		id: number;
+		user_id: number;
+		type: 'level-up-skill' | 'level-up-profile' | 'goal-complete';
+		title: string;
+		message: string;
+		created_at: string;
+	}
+
 	export type Notification = {
 		id: number;
 		type: 'newfollow' | 'newmessage' | 'levelup';
@@ -522,6 +531,7 @@ namespace Online {
 		if (!profileobj.state) {
 			throw new Error('profile object is still undefined');
 		}
+		profileobj.state.changeId(user_obj.id);
 		profileobj.state.Username = user_obj.username;
 		profileobj.state.NameEventless = user_obj.name;
 		profileobj.state.Level = user_obj.level;
@@ -676,7 +686,33 @@ namespace Online {
 		);
 	}
 
+	//////////
+	/* FEED */
+	//////////
 
+	/*
+	 * getFeed
+	 * returns the feed of the current user
+	 */
+	export async function getFeed(uid: number) {
+		return await API.get<APITypes.FeedPost[]>(
+			`protected/user/${uid}/feed`,
+			header(),
+		);
+	}
+
+	/*
+	 * getPosts
+	 * returns the posts of the user
+	 * @param uid - the user id
+	 * @returns the posts of the user	
+	 */
+	export async function getPosts(uid: number) {
+		return await API.get<APITypes.FeedPost[]>(
+			`protected/user/${uid}/posts`,
+			header(),
+		);
+	}
 
 }
 
@@ -1000,6 +1036,35 @@ export namespace APIMethods {
 	}
 
 
+	//////////
+	/* FEED */
+	//////////
+	//
+
+	/*
+	 * getFeed
+	 * returns the feed of the current user
+	 */
+	export async function getFeed(uid: number) {
+		if (Authentication.getOfflineMode()) {
+			return [];
+		}
+		return await API.queueAndWait(() => Online.getFeed(uid), 'getFeed');
+	}
+
+	/*
+	 * getPosts
+	 * returns the posts of the users
+	 * @param uid - the user user
+	 */
+	export async function getPosts(uid: number) {
+		if (Authentication.getOfflineMode()) {
+			return [];
+		}
+		return await API.queueAndWait(() => Online.getPosts(uid), 'getPosts');
+	}
+
+
 	/* migration stuff */
 	export async function migrate(uid: string | number, profile: ProfileProps & { skills: SkillProps[] }) {
 		if (Authentication.getOfflineMode()) {
@@ -1007,7 +1072,6 @@ export namespace APIMethods {
 		}
 		return await API.queueAndWait(() => Online.migrate(uid, profile), 'migrate');
 	}
-
 
 
 }
