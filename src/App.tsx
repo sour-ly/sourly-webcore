@@ -34,6 +34,7 @@ import UserSearch from './views/UserSearch';
 import { Electron } from './util/electron';
 import IPC from './ReactIPC';
 import { SourlyWebSocket } from './api/ws';
+import Feed from './views/Feed';
 
 export type WindowContextType = {
 	popUp: WindowPopUp;
@@ -391,6 +392,15 @@ export default function App() {
 											</ProtectedRoute>
 										}
 									/>
+									<Route
+										path="/feed"
+										element={
+											<ProtectedRoute>
+												<Feed />
+											</ProtectedRoute>
+										}
+									/>
+
 									<Route
 										path="/profile"
 										element={

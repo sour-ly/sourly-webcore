@@ -7,7 +7,6 @@ export function sqltimetojsdate(sqltime: string) {
 }
 
 export function getFormattedDate(date: Date): string {
-	console.log(Date.now() - date.getTime());
 	//if less than 24 hours, show timestamp
 	if (Date.now() - date.getTime() < 86400000) {
 		//HH:MM

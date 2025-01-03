@@ -8,6 +8,8 @@
   box-sizing: border-box;
   gap: .60rem;
   border-bottom: 0.1450rem solid var(--card-border);
+  flex-shrink: 0;
+  cursor: pointer;
 
 
   img {

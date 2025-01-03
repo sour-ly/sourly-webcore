@@ -1045,9 +1045,9 @@ export namespace APIMethods {
 	 * getFeed
 	 * returns the feed of the current user
 	 */
-	export async function getFeed(uid: number) {
+	export async function getFeed(uid: number): Promise<{ posts: APITypes.FeedPost[] }> {
 		if (Authentication.getOfflineMode()) {
-			return [];
+			return { posts: [] };
 		}
 		return await API.queueAndWait(() => Online.getFeed(uid), 'getFeed');
 	}

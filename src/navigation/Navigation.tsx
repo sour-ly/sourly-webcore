@@ -68,6 +68,9 @@ function Navigator() {
 				case '/':
 					spot = 0;
 					break;
+				case '/feed':
+					spot = 1;
+					break;
 				case '/signup':
 					spot = 1;
 					break;
@@ -101,9 +104,15 @@ function Navigator() {
 								<span>Home</span>
 							</div>
 						</Link>
-						<div className="netscape-box disabled" datatype-order={1}>
-							<span>N/A</span>
-						</div>
+						<Link href="/feed">
+							<div className="netscape-box"
+								datatype-order={1}
+								onMouseEnter={handleHover}
+								onMouseLeave={handleExit}
+							>
+								<span>Feed</span>
+							</div>
+						</Link>
 						<Link href="/search">
 							<div className="netscape-box"
 								datatype-order={2}

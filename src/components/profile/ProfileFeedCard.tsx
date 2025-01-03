@@ -25,7 +25,7 @@ export function ProfileFeedCard({ profile_obj, setProfile, extraData }: ProfileF
 			<span>Feed</span>
 			<div className="profile-feed-card__posts scrollbar">
 				{extraData.feed.value && extraData.feed.value?.map && extraData.feed.value?.map((post) => (
-					<FeedComponent key={post.id} {...post} {...profile_obj} />
+					<FeedComponent key={post.id} {...profile_obj} {...post} />
 				))}
 			</div>
 		</div>
