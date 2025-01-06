@@ -8,6 +8,7 @@ import './styles/feed.scss';
 
 export default function Feed() {
 
+	const offline = Authentication.getOfflineMode();
 	const [feedPosts, setFeedPosts] = useState<APITypes.FeedPost[]>([]);
 	const [usersCache, setUsersCache] = useState<{ [key: number]: ProfileSkeleton }>({});
 
@@ -33,6 +34,18 @@ export default function Feed() {
 		}
 		setUsersCache(obj);
 		setFeedPosts(posts.posts);
+	}
+
+	if (offline) {
+		return (
+			<main>
+				<h1 style={{ marginBottom: '1rem' }}>UserSearch</h1>
+				<div className="search-container">
+					<h2>Offline Mode</h2>
+					<p>Offline mode is enabled. You do not have a feed.</p>
+				</div>
+			</main>
+		)
 	}
 
 	return (

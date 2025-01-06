@@ -7,38 +7,40 @@ export function VersionPage() {
 			<div className="messagescreen__content__main__body__section">
 				<h2>Whats New?:</h2>
 				<p>
-					Welcome to the new 0.1.1 version of Sourly! This version changes a lot and adds a bit more to the application. This leap forward is pivotal in the development of the application, and I hope you enjoy the new features that have been added.
+					Welcome to the new 0.2.0 version of Sourly! This is a big update that includes a whole bunch of social features, as well as a few bug fixes and performance improvements. Here are some of the highlights:
+				</p>
+				<b>Follower System:</b> You can now follow other users and see their posts in your feed. You can also get notified when they post something new. This is a great way to stay connected with your friends and see what they're up to. This system is still in beta, and not everything is implemented yet, but we're working on it! You can expect more features such as a notification page, a way to see who is following you, and group skills in the future!
+				<p>
+					<b>Notification System:</b> We've added a new notification system that will let you know when you've been followed, and when you're profile has leveled up. While this system is still in beta, we're working on adding more notifications in the future; there just isn't a lot to notify you about yet!
 				</p>
 				<p>
-					First and foremost, the addition of the backend API is a huge step forward in the development of the application. This will allow the application to be more dynamic and allow for more features to be added in the future. This allows us to sync our data with multiple devices, and allows us to have a more robust system for the application. This also opens the door for more API-like features, such as a websocket notification system, social features, inventory, and more.
+					<b>Feed:</b> You can now see posts from users you follow in your feed. This is a great way to stay up to date with what your friends are doing. This is still in beta (just like everything else), so expect more features in the future! You can expect liking and engaging with other users posts, a way to see who liked your posts, and more in-depth feed customization in the future!
 				</p>
 				<p>
-					The most neat feature that has been added is the Google Authentication system. This allows you to sign in with your Google account, and allows you to sync your data with multiple devices. This is a huge step forward in the development of the application, and I hope you enjoy this feature.
-				</p>
-				<p>
-					Last but not least, the application has been ported to the web. This allows you to use the application on any device, and allows you to sync your data with multiple devices. This is a huge step forward in the development of the application, and I hope you enjoy this feature.
+					<b>Profile Page:</b> We've noticed that the profile page was a bit lacking and barebones, so we've rehauled it! You can now see your followers, following, and skills on your profile page. On top of that, we've added a Top Skill and Feed section to the profile page to give you a better overview of your profile. We're still working on adding more features to the profile page, such as a way to see who is following you, a way to see who liked your posts, and more in-depth profile customization in the future!
 				</p>
 				<h3> TL;DR </h3>
 				<ul>
-					<li>Ported Sourly to the web</li>
-					<li>Added API</li>
-					<li>Added Google Authentication</li>
-					<li>Fixed a lot of bugs</li>
-					<li>Maintained the same look and feel</li>
-					<li>Offline to Online (one-time) migration</li>
+					<li>Follow other users and see their posts in your feed</li>
+					<li>Get notified when you're followed or when your profile levels up</li>
+					<li>See posts from users you follow in your feed</li>
+					<li>See your followers, following, and skills on your profile page</li>
+					<li>Added a Top Skill and Feed section to the profile page</li>
 				</ul>
 			</div>
 			<div className="messagescreen__content__main__body__section">
 				<h2>Next:</h2>
 				<p>
-					There are a few things that are planned for the next version of the
-					application, such as:
+					We're not done yet! We want to add more features to Sourly to make it the best it can be. Here are some of the things we're working on:
 				</p>
 				<ul>
-					<li>Adding a notification system from the backend server</li>
-					<li>A mobile-friendly version of the application</li>
-					<li>Adding a social feature to the application</li>
-					<li>Very simple inventory and drop system</li>
+					<li>More social features, such as liking and reacting to posts</li>
+					<li>More notifications, such as when someone likes your post</li>
+					<li>More feed customization options, such as filtering posts by skill, user, or even see what other people are doing</li>
+					<li>More profile customization options, such as changing your profile picture</li>
+					<li>Group Skills, a shared skill that multiple users can contribute to</li>
+					<li>Item System, a way to reward users for their achievements by giving them items</li>
+					<li>More performance improvements and bug fixes</li>
 				</ul>
 			</div>
 		</>

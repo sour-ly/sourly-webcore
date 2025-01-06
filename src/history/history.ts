@@ -160,10 +160,10 @@ export namespace History {
 			const bAgg = aggregate(b);
 
 			const factors = {
-				goalsCompleted: 3,
-				totalXP: .8,
-				totalLevels: 1,
-				goalsIncremented: .5,
+				goalsCompleted: 10,
+				totalXP: 0.4,
+				totalLevels: 2,
+				goalsIncremented: 2,
 			}
 
 			const score = (agg: SkillHistory) => agg.goalsCompleted * factors.goalsCompleted + agg.totalXP * factors.totalXP + agg.totalLevels * factors.totalLevels + agg.goalsIncremented * factors.goalsIncremented;

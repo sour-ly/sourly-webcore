@@ -105,6 +105,15 @@ namespace ProfileEvents {
 				APIMethods.clearSkillHistory(newSkill.Id);
 				return false;
 			}
+			if ("error" in r) {
+				Log.log(
+					'Profile:onUpdates::saveSkills',
+					1,
+					'failed to remove skills from storage - %s',
+					r.error,
+				);
+				return true;
+			}
 			if (r) {
 				if (Authentication.getOfflineMode()) {
 					Log.log(
