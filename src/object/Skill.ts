@@ -86,7 +86,10 @@ export default class Skill extends Eventful<EventMap> {
 			if (goal.Completed && !revertCompletion) {
 			} else if (revertCompletion) {
 				this.addExperience(-goal.Reward);
-			} else this.addExperience(amount * (goal.Reward * 0.05));
+			} else {
+				// add to history for offline use
+				this.addExperience(amount * (goal.Reward * 0.05))
+			}
 		});
 		/* pass through listeners */
 		this.passThroughListeners.forEach((listeners, event) => {

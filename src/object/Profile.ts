@@ -4,6 +4,7 @@ import { Log } from '../log/log';
 import { profileobj, SourlyFlags } from '../';
 import Goal, { GoalProps } from './Goal';
 import Skill, { SkillContainer, SkillEventMap, SkillProps } from './Skill';
+import Identifiable from '../id/id';
 
 type SkillEventMapOverride = {
 	onUpdates: { profile: Profile; skills: Skill[] };
@@ -99,9 +100,11 @@ namespace ProfileEvents {
 		}
 
 		export async function skillRemoved({ newSkill }: { newSkill: Skill }) {
-			if (!newSkill) return true;
 			const r = await APIMethods.refreshIfFailed(() => APIMethods.saveSkills(newSkill.toJSON(), 'delete'));
-			if (r == true) return false;
+			if (r == true) {
+				APIMethods.clearSkillHistory(newSkill.Id);
+				return false;
+			}
 			if (r) {
 				if (Authentication.getOfflineMode()) {
 					Log.log(
@@ -230,7 +233,19 @@ namespace ProfileEvents {
 			}
 			else {
 				return await APIMethods.refreshIfFailed(() => APIMethods.incrementGoal(goal.Id, skill.Id)).then((r) => {
-					if (r === true) return false;
+					if (r === true) {
+						APIMethods.pushSkillHistory({
+							id: 0,
+							user_id: -2, //offline
+							skill_id: skill.Id,
+							goal_id: goal.Id,
+							type: 'goal-increment',
+							xp: amount * (goal.Reward * 0.05),
+							level: 0,
+							created_at: new Date().toISOString(),
+						});
+						return false
+					};
 					if ("error" in r) {
 						Log.log(
 							'Profile:addSkillListeners::incrementGoal',
@@ -319,6 +334,7 @@ namespace ProfileEvents {
 
 		export async function experienceGained(profile: Profile) {
 			if (Authentication.getOfflineMode()) {
+
 				await APIMethods.refreshIfFailed(() => APIMethods.saveSkills(profile.serializeSkills(), "update"));
 			}
 			return;
@@ -375,10 +391,23 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
 	override addSkillListeners(skill: Skill) {
 		super.addSkillListeners(skill);
 		skill.on('levelUp', (arg) => {
+			console.log('Profile:addSkillListeners::levelUp', arg);
 			this.addExperience(arg.level * 1.5);
+			/* push the experience to the history for offline */
+			APIMethods.pushSkillHistory({
+				id: Identifiable.newId(),
+				user_id: -2, //offline
+				skill_id: skill.Id,
+				goal_id: -1,
+				type: 'level-up',
+				xp: 0,
+				level: 1,
+				created_at: new Date().toISOString(),
+			});
 		});
 		skill.on('experienceGained', (arg) => {
 			this.addExperience(arg.experience * 0.6);
+
 		});
 		skill.on('goalAdded', goal => {
 			//just handle the goalAdded event

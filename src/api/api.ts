@@ -93,6 +93,33 @@ export namespace APITypes {
 		completed: boolean;
 	};
 
+	/* HISTORY */
+
+	export type HistoryBase = {
+		id: number;
+		user_id: number;
+		created_at: string;
+	}
+
+	export type HistorySkill = HistoryBase & {
+		/* multiple events can happen at the same time, so it's important to have a timestamp */
+		type: 'level-up' | 'goal-complete' | 'goal-increment' | 'goal-decrement';
+		skill_id: number;
+		goal_id: number;
+		/* expect a goal id if the type is goal-complete, goal-increment, or goal-decrement 
+		 * also expect that xp and level are not 0 if the type is level up.
+		 */
+		xp: number; // experience gained (default 0)
+		level: number; // level gained (default 0)
+	}
+
+	export type HistoryProfile = HistoryBase & {
+		type: 'level-up' | 'xp-gain' | 'item-drop' | 'item-use';
+		xp: number; // experience gained (default 0)
+		level: number; // level gained (default 0)
+		/* expect a new item id if the type is item-drop or item-use */
+	}
+
 	/* UPDATE/REQUESTS */
 	export type SkillUpdate = {
 		id: string;
@@ -476,6 +503,60 @@ namespace Offline {
 	export async function saveProfileOffline(profile: object): Promise<void> {
 		storage.save('profile', profile);
 	}
+
+	/////////////
+	/* HISTORY */
+	/////////////
+
+	// history object
+	var history: OfflineHistory = undefined;
+
+	type OfflineHistory = {
+		profile: APITypes.HistoryProfile[];
+		skills: APITypes.HistorySkill[];
+	}
+
+	export async function getHistory(): Promise<OfflineHistory> {
+		if (!history) {
+			let historyObj = await storage.get('history');
+			if (!historyObj) {
+				historyObj = {
+					profile: [],
+					skills: [],
+				};
+			} else if (Object.keys(historyObj).length === 0) {
+				historyObj = {
+					profile: [],
+					skills: [],
+				};
+			}
+			history = historyObj as OfflineHistory;
+		}
+		return history as OfflineHistory;
+	}
+
+	export async function pushHistory<T extends keyof OfflineHistory, Z = T extends 'skills' ? APITypes.HistorySkill : APITypes.HistoryProfile>(type: T, data: Z) {
+		const history = await getHistory();
+		if (type === 'skills') {
+			history.skills.push(data as APITypes.HistorySkill);
+		} else {
+			history.profile.push(data as APITypes.HistoryProfile);
+		}
+		storage.save('history', history);
+	}
+
+	export async function clearSkillHistory() {
+		const history = await getHistory();
+		history.skills = [];
+		storage.save('history', history);
+	}
+
+	export async function clearSkillHistoryBySkillId(skill_id: number) {
+		const history = await getHistory();
+		history.skills = history.skills.filter((h) => h.skill_id !== skill_id);
+		storage.save('history', history);
+	}
+
 }
 
 type GetSkillProps = {
@@ -690,9 +771,9 @@ namespace Online {
 	/* FEED */
 	//////////
 
-	/*
-	 * getFeed
-	 * returns the feed of the current user
+	/**
+	 * @name getFeed
+	 * @description returns the feed of the current user
 	 */
 	export async function getFeed(uid: number) {
 		return await API.get<APITypes.FeedPost[]>(
@@ -701,9 +782,9 @@ namespace Online {
 		);
 	}
 
-	/*
-	 * getPosts
-	 * returns the posts of the user
+	/**
+	 * @name getPosts
+	 * @description returns the posts of the user
 	 * @param uid - the user id
 	 * @returns the posts of the user	
 	 */
@@ -1033,6 +1114,52 @@ export namespace APIMethods {
 			return [];
 		}
 		return await API.queueAndWait(() => Online.getFollowing(uid), 'getFollowing');
+	}
+
+	//////////////
+	/* HISTORY */
+	/////////////
+
+	/**
+	 * @name getSkillHistory
+	 * @description returns the history of the skill
+	 * @param {number} skill_id - the skill id
+	 * @returns history of the skill
+	 */
+	export async function getSkillHistory(skill_id: number) {
+		if (Authentication.getOfflineMode()) {
+			return (await Offline.getHistory()).skills.filter((h) => h.skill_id === skill_id);
+		}
+		//@TODO implement this
+		return [];
+	}
+
+	/**
+	 * @name pushSkillHistory
+	 * @description this pushes a history object into the skill's history
+	 * @warning this does not push to the server
+	 * @param {APITypes.HistorySkill} history - the history object
+	 */
+	export async function pushSkillHistory(history: APITypes.HistorySkill) {
+		if (Authentication.getOfflineMode()) {
+			await Offline.pushHistory('skills', history);
+		} else {
+
+			return;
+		}
+	}
+
+	/**
+	 * @name clearSkillHistory
+	 * @description clears the param's skill history
+	 * @param {number} skill_id - the skill id
+	 */
+	export async function clearSkillHistory(skill_id: number) {
+		if (Authentication.getOfflineMode()) {
+			await Offline.clearSkillHistoryBySkillId(skill_id);
+		} else {
+			return;
+		}
 	}
 
 

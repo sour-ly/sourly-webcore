@@ -15,6 +15,8 @@ import { absorb } from '../util/click';
 import OptionDropdown from '../components/OptionDropdown';
 import { Button } from '../components/Button';
 import { truncateDecimal } from '../util/truncate';
+import { History } from '../history/history';
+import { APIMethods } from '../api/api';
 
 const sort_goals_by_completion = (
 	a: { Completed: boolean },
@@ -61,6 +63,14 @@ export function SkillView({
 			});
 		});
 
+		async function x() {
+			const ph = await APIMethods.getSkillHistory(skill.Id);
+			const history = History.Skill.create(ph);
+			const agg = history.aggregate();
+			console.log(agg);
+		}
+
+		x();
 		return () => {
 			skill.off('levelUp', i);
 		};
