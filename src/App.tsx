@@ -105,6 +105,10 @@ export default function App() {
 	useEffect(() => {
 
 		if (Electron.isUsingElectron) {
+
+			//set css flag
+			document.body.style.setProperty('--isElectron', 'true');
+			document.body.style.setProperty('--isWeb', 'false');
 			IPC.on('deeplink', (e) => {
 				if (e.func === 'login') {
 					if (e.token && e.refresh_token && e.user_id) {
@@ -122,6 +126,9 @@ export default function App() {
 					}
 				}
 			});
+		} else {
+			document.body.style.setProperty('--isElectron', 'false');
+			document.body.style.setProperty('--isWeb', 'true');
 		}
 
 		let z = 0;

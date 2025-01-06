@@ -82,6 +82,7 @@
       height: 2.0625rem;
       font-size: 1rem;
       border-width: 2px !important;
+
     }
 
     &.loading {
@@ -95,11 +96,15 @@
 
       aspect-ratio: 1;
       width: auto !important;
+      padding-left: 0 !important;
 
       img {
         height: 1.3rem !important;
         width: auto !important;
-        transform: translateX(-0.020rem) !important;
+
+        transform: translateX(0.12rem) !important;
+
+        margin: 0 !important;
         cursor: pointer;
       }
     }
