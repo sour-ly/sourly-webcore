@@ -8,6 +8,7 @@ import { useStateUtil } from '../util/state';
 import { useWindow } from '../App';
 import { Link } from '../util/link';
 import { APITypes } from '../api/api';
+import { api } from '..';
 
 export function Signup() {
 	const navigation = useNavigate();
@@ -118,7 +119,7 @@ export function Signup() {
 					<Button type="solid" onClick={() => { signup() }}>
 						Sign Up
 					</Button>
-					<Button type="outline" onClick={() => Link.NewTab('http://localhost:3000/api/v1/auth/register/google')}>
+					<Button type="outline" onClick={() => Link.NewTab(api.endpoint + '/api/v1/auth/register/google')}>
 						Sign Up with Google
 					</Button>
 				</div>
