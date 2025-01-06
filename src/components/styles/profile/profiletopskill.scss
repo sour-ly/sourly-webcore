@@ -9,6 +9,13 @@
     margin-top: 0.8rem;
   }
 
+  p.error {
+    font-size: 0.8750rem;
+    color: var(--error-color);
+    margin-top: 0.5rem;
+    text-align: center;
+  }
+
   &__stats {
     margin-top: .75rem;
     padding: 0 0.6875rem;

@@ -63,14 +63,6 @@ export function SkillView({
 			});
 		});
 
-		async function x() {
-			const ph = await APIMethods.getSkillHistory(skill.Id);
-			const history = History.Skill.create(ph);
-			const agg = history.aggregate();
-			console.log(agg);
-		}
-
-		x();
 		return () => {
 			skill.off('levelUp', i);
 		};

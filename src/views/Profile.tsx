@@ -149,7 +149,9 @@ function ProfilePage() {
 					<ProfileSkillCard skills={profile_state.skills ?? []} setProfile={setLoading} extraData={loading_state} />
 				</div>
 				<div className="profile-page__content__section">
-					<ProfileFeedCard profile_obj={profile_state} setProfile={setLoading} extraData={loading_state} />
+					{!Authentication.getOfflineMode() &&
+						<ProfileFeedCard profile_obj={profile_state} setProfile={setLoading} extraData={loading_state} />
+					}
 				</div>
 			</div>
 		</main>

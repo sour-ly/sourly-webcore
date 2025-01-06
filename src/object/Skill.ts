@@ -62,7 +62,7 @@ export default class Skill extends Eventful<EventMap> {
 		private hidden: boolean = false,
 	) {
 		super();
-		this.experienceRequired = this.calculateExperienceRequired(level);
+		this.experienceRequired = Skill.calculateExperienceRequired(level);
 		goals.forEach((goal) => {
 			// why? because event listeners jackass
 			this.addGoal(goal);
@@ -72,7 +72,7 @@ export default class Skill extends Eventful<EventMap> {
 		}
 	}
 
-	private calculateExperienceRequired(level: number) {
+	public static calculateExperienceRequired(level: number) {
 		// f = 50x^2 - 150x + 200 --> 50/3x^3 - 150/2z^2 + 200x
 		return Math.floor(50 * level ** 2 - 150 * level + 200);
 	}
@@ -106,7 +106,7 @@ export default class Skill extends Eventful<EventMap> {
 
 	private levelUp() {
 		this.level++;
-		this.experienceRequired = this.calculateExperienceRequired(this.level);
+		this.experienceRequired = Skill.calculateExperienceRequired(this.level);
 		this.emit('levelUp', { skill: this, level: this.level });
 	}
 
@@ -118,7 +118,7 @@ export default class Skill extends Eventful<EventMap> {
 		// go down a alevel
 		this.level--;
 		// reset the max experience
-		this.experienceRequired = this.calculateExperienceRequired(this.level);
+		this.experienceRequired = Skill.calculateExperienceRequired(this.level);
 	}
 
 	private async addExperience(experience: number) {

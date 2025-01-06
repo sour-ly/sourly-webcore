@@ -119,9 +119,11 @@ function ProductDetailCard({ profile_obj, editable, setProfile, extraData }: Pro
 						}
 					</div>
 					<div className="profile-detail-card__header__info__username">
-						<span>
-							@{profile_obj.username}
-						</span>
+						{!Authentication.getOfflineMode() && (
+							<span>
+								@{profile_obj.username}
+							</span>
+						)}
 					</div>
 					<div className="profile-detail-card__header__info__level">
 						<span>

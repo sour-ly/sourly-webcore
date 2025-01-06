@@ -795,6 +795,14 @@ namespace Online {
 		);
 	}
 
+	/////////////
+	/* HISTORY */
+	/////////////
+
+	export async function getSkillHistory(skill_id: number, limit: number = 500, age: number = 0) {
+		return await API.get<APITypes.HistorySkill[]>(`protected/skill/${skill_id}/history?limit=${limit}&maxdate=${age}`, header());
+	}
+
 }
 
 export namespace APIMethods {
@@ -1124,14 +1132,20 @@ export namespace APIMethods {
 	 * @name getSkillHistory
 	 * @description returns the history of the skill
 	 * @param {number} skill_id - the skill id
+	 * @param {number} limit - the limit of the history
+	 * @param {number} maxDate - the maximum date of the history
 	 * @returns history of the skill
 	 */
-	export async function getSkillHistory(skill_id: number) {
+	export async function getSkillHistory(skill_id: number, limit: number = 1000, maxDate: number = 0) {
 		if (Authentication.getOfflineMode()) {
-			return (await Offline.getHistory()).skills.filter((h) => h.skill_id === skill_id);
+			const date = maxDate > 0 ? Date.now() - maxDate * 1000 : 0;
+			const r = (await Offline.getHistory()).skills.filter((h) => h.skill_id === skill_id && new Date(h.created_at) > new Date(date)).reverse();
+			if (limit > 0) {
+				return r.slice(0, limit);
+			}
+			return r;
 		}
-		//@TODO implement this
-		return [];
+		return await API.queueAndWait(() => Online.getSkillHistory(skill_id, limit, maxDate), 'getSkillHistory');
 	}
 
 	/**

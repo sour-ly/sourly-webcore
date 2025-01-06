@@ -239,8 +239,8 @@ namespace ProfileEvents {
 							user_id: -2, //offline
 							skill_id: skill.Id,
 							goal_id: goal.Id,
-							type: 'goal-increment',
-							xp: amount * (goal.Reward * 0.05),
+							type: goal.Completed ? 'goal-complete' : 'goal-increment',
+							xp: goal.Completed ? goal.Reward : amount * (goal.Reward * 0.05),
 							level: 0,
 							created_at: new Date().toISOString(),
 						});
