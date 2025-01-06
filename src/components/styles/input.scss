@@ -14,6 +14,19 @@
     color: var(--text-color);
   }
 
+  &.checkbox {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+
+    label {
+      margin-bottom: 0;
+    }
+
+  }
+
   text-area,
   input {
     background: var(--bg) !important;
@@ -27,6 +40,23 @@
     &:focus,
     &:active {
       border-color: var(--border-color-active);
+    }
+  }
+
+  input[type='checkbox'] {
+    float: left;
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--input-border);
+    margin: 0;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 2.5px;
+    transition: background-color 150ms;
+
+    &:checked {
+      background-color: var(--border-color-active) !important;
     }
   }
 

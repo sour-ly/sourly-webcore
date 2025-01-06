@@ -44,6 +44,7 @@ export type SkillProps = {
 	level?: number;
 	currentExperience?: number;
 	goals?: GoalProps[];
+	hidden?: boolean;
 };
 
 export default class Skill extends Eventful<EventMap> {
@@ -58,9 +59,10 @@ export default class Skill extends Eventful<EventMap> {
 		private level: number = 1,
 		private currentExperience: number = 0,
 		goals: Goal[] = [],
+		private hidden: boolean = false,
 	) {
 		super();
-		this.experienceRequired = this.calculateExperienceRequired(level);
+		this.experienceRequired = Skill.calculateExperienceRequired(level);
 		goals.forEach((goal) => {
 			// why? because event listeners jackass
 			this.addGoal(goal);
@@ -70,7 +72,7 @@ export default class Skill extends Eventful<EventMap> {
 		}
 	}
 
-	private calculateExperienceRequired(level: number) {
+	public static calculateExperienceRequired(level: number) {
 		// f = 50x^2 - 150x + 200 --> 50/3x^3 - 150/2z^2 + 200x
 		return Math.floor(50 * level ** 2 - 150 * level + 200);
 	}
@@ -84,7 +86,10 @@ export default class Skill extends Eventful<EventMap> {
 			if (goal.Completed && !revertCompletion) {
 			} else if (revertCompletion) {
 				this.addExperience(-goal.Reward);
-			} else this.addExperience(amount * (goal.Reward * 0.05));
+			} else {
+				// add to history for offline use
+				this.addExperience(amount * (goal.Reward * 0.05))
+			}
 		});
 		/* pass through listeners */
 		this.passThroughListeners.forEach((listeners, event) => {
@@ -101,7 +106,7 @@ export default class Skill extends Eventful<EventMap> {
 
 	private levelUp() {
 		this.level++;
-		this.experienceRequired = this.calculateExperienceRequired(this.level);
+		this.experienceRequired = Skill.calculateExperienceRequired(this.level);
 		this.emit('levelUp', { skill: this, level: this.level });
 	}
 
@@ -113,7 +118,7 @@ export default class Skill extends Eventful<EventMap> {
 		// go down a alevel
 		this.level--;
 		// reset the max experience
-		this.experienceRequired = this.calculateExperienceRequired(this.level);
+		this.experienceRequired = Skill.calculateExperienceRequired(this.level);
 	}
 
 	private async addExperience(experience: number) {
@@ -209,10 +214,19 @@ export default class Skill extends Eventful<EventMap> {
 		return this.currentExperience / this.experienceRequired;
 	}
 
+	public get Hidden() {
+		return this.hidden;
+	}
+
 	/* setters */
 
 	public set Name(args: string) {
 		this.name = args;
+	}
+
+	// set if hidden
+	public set Hidden(args: boolean) {
+		this.hidden = args;
 	}
 
 	/* add goals -- this function is absorbable */
@@ -282,6 +296,7 @@ export default class Skill extends Eventful<EventMap> {
 			level: this.level,
 			currentExperience: this.currentExperience,
 			goals: this.goals.map((goal) => goal.toJSON()),
+			hidden: this.hidden,
 		};
 	}
 }
@@ -395,7 +410,7 @@ export abstract class SkillContainer<
 	}
 
 	public static castSkillFromJSON(skill: SkillProps) {
-		const n_skill = new Skill(skill.name, skill.level, skill.currentExperience);
+		const n_skill = new Skill(skill.name, skill.level, skill.currentExperience, [], skill.hidden);
 		n_skill.changeId(Number(skill.id ?? Identifiable.newId()));
 		if (skill.goals) {
 			for (const goal of skill.goals) {
@@ -426,6 +441,8 @@ export abstract class SkillContainer<
 		const fn = () => {
 			if (index !== -1 && new_skill.name) {
 				this.skills[index].Name = new_skill.name;
+				this.skills[index].Hidden = new_skill.hidden ?? false;
+				console.log('skillManager:updateSkill', 0, 'skill updated', this.skills[index]);
 				return true;
 			}
 		}

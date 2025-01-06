@@ -7,6 +7,7 @@ import { Authentication } from '../api/auth';
 import { APIMethods } from '../api/api';
 import { useWindow } from '../App';
 import { flags, SourlyFlags } from '..';
+import { SourlyWebSocket } from '../api/ws';
 
 type ProtectedRouteProps = {
 	children: React.ReactNode;
@@ -59,6 +60,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 			if (!refreshed) {
 				navigation('/login');
 				Authentication.logout();
+			} else {
+				if (!Authentication.getOfflineMode()) {
+					SourlyWebSocket.connect(Authentication.loginState.state().accessToken).catch(() => {
+					});
+				}
 			}
 		};
 		x();

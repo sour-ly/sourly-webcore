@@ -12,6 +12,8 @@ export type Asset =
 	'ui/pencil' |
 	'ui/plus' |
 	'ui/pfp' |
+	'ui/gear' |
+	'ui/user' |
 	/* images */
 	'images/welcome-screen-add-goal' |
 	'images/welcome-screen-add-goal-popup' |

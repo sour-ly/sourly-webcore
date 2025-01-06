@@ -4,6 +4,7 @@ import { Profile } from '../object/Profile';
 import { profileobj, setProfile, storage } from '../';
 import { ReactlessState, Stateful } from '../util/state';
 import { API, APIMethods, APITypes } from './api';
+import { CredentialResponse } from '@react-oauth/google';
 
 export type LoginState = {
 	null: boolean;
@@ -87,7 +88,7 @@ export namespace Authentication {
 			callback: StateChangeCallback,
 		) {
 			this.loginState = state;
-			super.emit('loginStateChange', { state, callback });
+			super.emit('loginStateChange', { state, callback: (s) => { console.log('callback'), callback(s); } });
 		}
 
 		public set LoginStateEventless(state: LoginState) {
@@ -194,6 +195,38 @@ export namespace Authentication {
 		return true;
 	}
 
+	export async function loginWithGoogle(googleResponse: CredentialResponse, callback: () => any): Promise<true | APITypes.APIError> {
+		console.log(googleResponse);
+		const api_resp = await API.queueAndWait(
+			async () => await API.loginWithGoogle(googleResponse),
+			'auth::login::google',
+		)
+		if ('error' in api_resp) {
+			return api_resp;
+		}
+		if (
+			api_resp.accessToken === '' ||
+			api_resp.accessToken === 'no-user-id' ||
+			api_resp.accessToken === 'invalid-refresh-token'
+		) {
+			return api_resp;
+		}
+		bLoggedIn = true;
+		loginState.setState({
+			state: {
+				null: false,
+				offline: false,
+				userid: api_resp.userid,
+				username: api_resp.username,
+				accessToken: api_resp.accessToken,
+				refreshToken: api_resp.refreshToken,
+			},
+			callback
+		});
+		return true;
+
+	}
+
 	export async function onlineMode(
 		callback: () => void,
 		eventful: boolean = true,
@@ -217,7 +250,7 @@ export namespace Authentication {
 					},
 					flags: profileobj.Flags,
 				}).finally(() => {
-					if (profileobj.Name === 'User') return;
+
 					if (eventful)
 						loginState.setState({ ...loginState.state(), offline: false });
 					else

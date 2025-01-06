@@ -100,7 +100,7 @@ function Settings() {
 
 	function logout() {
 		Authentication.logout();
-		// navigation('/login');
+		navigation('/login');
 	}
 
 	function migrate() {
@@ -228,23 +228,27 @@ function Settings() {
 					>
 						Reset Settings
 					</Button>
-					<Button
-						style={{ marginTop: '1rem' }}
-						type="outline"
-						onClick={migrate}
-						className="settings__save"
-						disabled={!canMigrate}
-					>
-						Migrate Offline Data
-					</Button>
-					<Button
-						style={{ marginTop: '1rem' }}
-						type="solid"
-						onClick={logout}
-						className="settings__save"
-					>
-						Logout
-					</Button>
+					{Authentication.getLoggedIn() && (
+						<>
+							<Button
+								style={{ marginTop: '1rem' }}
+								type="outline"
+								onClick={migrate}
+								className="settings__save"
+								disabled={!canMigrate}
+							>
+								Migrate Offline Data
+							</Button>
+							<Button
+								style={{ marginTop: '1rem' }}
+								type="solid"
+								onClick={logout}
+								className="settings__save"
+							>
+								Logout
+							</Button>
+						</>
+					)}
 				</div>
 			</div>
 		</main>

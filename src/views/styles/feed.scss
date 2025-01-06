@@ -1,0 +1,13 @@
+main.feed {
+  .feed {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: .75rem;
+    box-sizing: border-box;
+    width: 100%;
+    overflow-y: auto;
+    margin-top: 0rem;
+  }
+}

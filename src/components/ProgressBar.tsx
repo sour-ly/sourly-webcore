@@ -3,42 +3,44 @@ import './styles/progressbar.scss';
 import OptionDropdown, { Options } from './OptionDropdown';
 
 type ProgressBarProps = {
-  max: number;
-  value: number;
-  options?: Options;
+	max: number;
+	value: number;
+	options?: Options;
+	type?: 'normal' | 'thick';
 };
 
 export default function ProgressBar({
-  max,
-  value,
-  options = [],
+	max,
+	value,
+	options = [],
+	type = 'normal',
 }: ProgressBarProps) {
-  const ref = React.createRef<HTMLDivElement>();
+	const ref = React.createRef<HTMLDivElement>();
 
-  React.useEffect(() => {
-    changePercentage(value);
-  }, [ref, value, max]);
+	React.useEffect(() => {
+		changePercentage(value);
+	}, [ref, value, max]);
 
-  const changePercentage = useMemo(() => {
-    return (value: number) => {
-      const percentage = (value / max) * 100;
-      if (!ref.current) return;
-      ref.current.style.setProperty('--private-progress', `${percentage}%`);
-    };
-  }, [value, max, ref]);
+	const changePercentage = useMemo(() => {
+		return (value: number) => {
+			const percentage = (value / max) * 100;
+			if (!ref.current) return;
+			ref.current.style.setProperty('--private-progress', `${percentage}%`);
+		};
+	}, [value, max, ref]);
 
-  return (
-    <div className="progress-bar__container">
-      {options && options.length > 0 && (
-        <OptionDropdown
-          options={options}
-          className="progress-bar__dot_container"
-        />
-      )}
-      <div className="progress-bar">
-        <div className="progress-bar__background" />
-        <div className="progress-bar__fill" ref={ref} />
-      </div>
-    </div>
-  );
+	return (
+		<div className={`progress-bar__container`}>
+			{options && options.length > 0 && (
+				<OptionDropdown
+					options={options}
+					className="progress-bar__dot_container"
+				/>
+			)}
+			<div className={`progress-bar ${type == 'thick' && 'thick' || ''}`}>
+				<div className="progress-bar__background" />
+				<div className="progress-bar__fill" ref={ref} />
+			</div>
+		</div>
+	);
 }

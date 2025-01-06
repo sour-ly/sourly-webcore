@@ -10,9 +10,11 @@ import { absorb } from '../util/click';
 export default function GoalView({
 	goal,
 	skill_id,
+	staticView = false,
 }: {
 	goal: Goal;
 	skill_id: number;
+	staticView?: boolean;
 }) {
 	const goalpop = GoalPopUpWrapper({
 		goalt: goal,
@@ -39,6 +41,7 @@ export default function GoalView({
 
 	function divClick(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
 		absorb(e);
+		if (staticView) return;
 		goal.incrementProgress(1);
 	}
 
@@ -49,7 +52,9 @@ export default function GoalView({
 		>
 			<div className="goalview__title">
 				<h2>{goal.Name} </h2>
-				<OptionDropdown options={options} />
+				{!staticView &&
+					<OptionDropdown options={options} />
+				}
 			</div>
 			<p>
 				{goal.Description.trim().length === 0

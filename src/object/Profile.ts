@@ -4,6 +4,7 @@ import { Log } from '../log/log';
 import { profileobj, SourlyFlags } from '../';
 import Goal, { GoalProps } from './Goal';
 import Skill, { SkillContainer, SkillEventMap, SkillProps } from './Skill';
+import Identifiable from '../id/id';
 
 type SkillEventMapOverride = {
 	onUpdates: { profile: Profile; skills: Skill[] };
@@ -12,7 +13,10 @@ type SkillEventMapOverride = {
 } & Omit<SkillEventMap, 'onUpdates'>;
 
 export interface ProfileSkeleton {
+	id: number;
 	name: string;
+	username: string;
+	skills?: SkillProps[];
 	level: number;
 	currentExperience: number;
 	version: string;
@@ -68,7 +72,7 @@ namespace ProfileEvents {
 
 		export async function skillChanged({ skill, newSkill }: { skill: Skill, newSkill: SkillProps }) {
 			if (!newSkill) return true;
-			const r = await APIMethods.refreshIfFailed(() => APIMethods.saveSkills({ id: skill.Id, name: newSkill.name }, 'update'));
+			const r = await APIMethods.refreshIfFailed(() => APIMethods.saveSkills({ id: skill.Id, name: newSkill.name, hidden: newSkill.hidden }, 'update'));
 			if (r == true) return false;
 			if (!("error" in r)) {
 				if (Authentication.getOfflineMode()) {
@@ -96,9 +100,20 @@ namespace ProfileEvents {
 		}
 
 		export async function skillRemoved({ newSkill }: { newSkill: Skill }) {
-			if (!newSkill) return true;
 			const r = await APIMethods.refreshIfFailed(() => APIMethods.saveSkills(newSkill.toJSON(), 'delete'));
-			if (r == true) return false;
+			if (r == true) {
+				APIMethods.clearSkillHistory(newSkill.Id);
+				return false;
+			}
+			if ("error" in r) {
+				Log.log(
+					'Profile:onUpdates::saveSkills',
+					1,
+					'failed to remove skills from storage - %s',
+					r.error,
+				);
+				return true;
+			}
 			if (r) {
 				if (Authentication.getOfflineMode()) {
 					Log.log(
@@ -227,7 +242,19 @@ namespace ProfileEvents {
 			}
 			else {
 				return await APIMethods.refreshIfFailed(() => APIMethods.incrementGoal(goal.Id, skill.Id)).then((r) => {
-					if (r === true) return false;
+					if (r === true) {
+						APIMethods.pushSkillHistory({
+							id: 0,
+							user_id: -2, //offline
+							skill_id: skill.Id,
+							goal_id: goal.Id,
+							type: goal.Completed ? 'goal-complete' : 'goal-increment',
+							xp: goal.Completed ? goal.Reward : amount * (goal.Reward * 0.05),
+							level: 0,
+							created_at: new Date().toISOString(),
+						});
+						return false
+					};
 					if ("error" in r) {
 						Log.log(
 							'Profile:addSkillListeners::incrementGoal',
@@ -316,6 +343,7 @@ namespace ProfileEvents {
 
 		export async function experienceGained(profile: Profile) {
 			if (Authentication.getOfflineMode()) {
+
 				await APIMethods.refreshIfFailed(() => APIMethods.saveSkills(profile.serializeSkills(), "update"));
 			}
 			return;
@@ -341,6 +369,7 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
 
 	constructor(
 		private name: string = 'User',
+		private username: string = '',
 		level?: number,
 		currentExperience?: number,
 		skills?: Skill[],
@@ -371,10 +400,23 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
 	override addSkillListeners(skill: Skill) {
 		super.addSkillListeners(skill);
 		skill.on('levelUp', (arg) => {
+			console.log('Profile:addSkillListeners::levelUp', arg);
 			this.addExperience(arg.level * 1.5);
+			/* push the experience to the history for offline */
+			APIMethods.pushSkillHistory({
+				id: Identifiable.newId(),
+				user_id: -2, //offline
+				skill_id: skill.Id,
+				goal_id: -1,
+				type: 'level-up',
+				xp: 0,
+				level: 1,
+				created_at: new Date().toISOString(),
+			});
 		});
 		skill.on('experienceGained', (arg) => {
 			this.addExperience(arg.experience * 0.6);
+
 		});
 		skill.on('goalAdded', goal => {
 			//just handle the goalAdded event
@@ -471,6 +513,15 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
 		this.currentExperience = currentExperience;
 	}
 
+
+	get Username() {
+		return this.username;
+	}
+
+	set Username(username: string) {
+		this.username = username;
+	}
+
 	get Level() {
 		return this.level;
 	}
@@ -505,7 +556,10 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
 
 	public serialize() {
 		return {
+			id: this.Id,
 			name: this.name,
+			skills: this.skills.map(skill => skill.toJSON()),
+			username: this.username,
 			level: this.level,
 			currentExperience: this.currentExperience,
 			version: this.version,

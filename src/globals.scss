@@ -39,7 +39,7 @@
   //activity
   --progress-bar-height: 0.3571rem;
   --progress-bar-track: #525252;
-  --progress-bar-fill: var(--accent);
+  --progress-bar-fill: #FF8057;
   --activity-width: 18.7143rem;
   --activity-title-font-size: 1.9286rem;
   --activity-title-weight: 500;
@@ -113,6 +113,10 @@
   --navigation-bar-button-hover-color-dark: #3f3f3f;
   --navigation-bar-button-border-color-dark: #4f4f4f;
 
+  --navigation-bar-button-small-filter-hover-dark: invert(100%) sepia(4%) saturate(7457%) hue-rotate(291deg) brightness(103%) contrast(111%);
+  --navigation-bar-button-small-filter-hover-light: invert(0%) sepia(12%) saturate(1172%) hue-rotate(173deg) brightness(101%) contrast(99%);
+  --navigation-bar-button-small-filter-dark: invert(99%) sepia(5%) saturate(77%) hue-rotate(321deg) brightness(111%) contrast(91%);
+  --navigation-bar-button-small-filter-light: invert(0%) sepia(24%) saturate(1659%) hue-rotate(226deg) brightness(104%) contrast(85%);
 
   //navigation defaults
   --navigation-bar-top: 1.5rem;
@@ -120,6 +124,11 @@
   --navigation-bar-button-color: var(--navigation-bar-button-color-light);
   --navigation-bar-button-hover-color: var(--navigation-bar-button-hover-color-light);
   --navigation-bar-button-border-color: var(--navigation-bar-button-border-color-light);
+
+  //filter to invert 
+  --navigation-bar-button-small-filter: var(--navigation-bar-button-small-filter-light);
+  --navigation-bar-button-small-filter-hover: var(--navigation-bar-button-small-filter-hover-light);
+
 
   //divider line
   --divider-color-light: #e8e8e8;
@@ -168,15 +177,25 @@
   --profile-detail-card-bg-dark: #1e1e1e;
   --profile-detail-card-border-light: #e8e8e8;
   --profile-detail-card-border-dark: #333;
+  --profile-detail-card-username-dark: #4b4b4b;
+  --profile-detail-card-username-light: #c4c4c4;
+  --profile-detail-card-level-ring-dark: #ffffff;
+  --profile-detail-card-level-ring-light: #000000;
+
+  --profile-skill-card-height: 18.0625rem;
+
   //defaults
   --profile-detail-card-bg: var(--profile-detail-card-bg-light);
   --profile-detail-card-border: var(--profile-detail-card-border-light);
+  --profile-detail-card-username: var(--profile-detail-card-username-light);
+  --profile-detail-card-level-ring: var(--profile-detail-card-level-ring-light);
 
   //option
   --option-filter-light: invert(0%) sepia(96%) saturate(3968%) hue-rotate(255deg) brightness(99%) contrast(100%);
   --option-filter-dark: invert(41%) sepia(0%) saturate(1815%) hue-rotate(226deg) brightness(92%) contrast(90%);
   //defaults
   --option-filter: var(--option-filter-light);
+
 
 
   //z-index book
@@ -217,10 +236,15 @@
   --navigation-bar-button-color: var(--navigation-bar-button-color-dark);
   --navigation-bar-button-hover-color: var(--navigation-bar-button-hover-color-dark);
   --navigation-bar-button-border-color: var(--navigation-bar-button-border-color-dark);
+  --navigation-bar-button-small-filter: var(--navigation-bar-button-small-filter-dark);
+  --navigation-bar-button-small-filter-hover: var(--navigation-bar-button-small-filter-hover-dark);
+
 
   //profile detail card
   --profile-detail-card-bg: var(--profile-detail-card-bg-dark);
   --profile-detail-card-border: var(--profile-detail-card-border-dark);
+  --profile-detail-card-username: var(--profile-detail-card-username-dark);
+  --profile-detail-card-level-ring: var(--profile-detail-card-level-ring-dark);
 
   //option
   --option-filter: var(--option-filter-dark);

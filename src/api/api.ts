@@ -7,6 +7,7 @@ import { profileobj, SourlyFlags } from '../index';
 import Queue from '../util/queue';
 import { Stateful } from '../util/state';
 import { Authentication, LoginState } from './auth';
+import { CredentialResponse } from '@react-oauth/google';
 
 export namespace APITypes {
 	export type APIError = {
@@ -14,6 +15,30 @@ export namespace APITypes {
 		message: string;
 		code: number;
 	};
+
+	export type FollowResponse = {
+		success: true,
+		message: string
+	}
+
+	export type FeedPost = {
+		id: number;
+		user_id: number;
+		type: 'level-up-skill' | 'level-up-profile' | 'goal-complete';
+		title: string;
+		message: string;
+		created_at: string;
+	}
+
+	export type Notification = {
+		id: number;
+		type: 'newfollow' | 'newmessage' | 'levelup';
+		from: number;
+		to: number;
+		content: string;
+		seen: boolean;
+		created_at: string;
+	}
 
 	export type LoginResponse = {
 		user_id: number;
@@ -51,6 +76,7 @@ export namespace APITypes {
 		level: number;
 		currentExperience: number;
 		created_at: string;
+		hidden: boolean;
 		goals: Goal[];
 	};
 
@@ -66,6 +92,33 @@ export namespace APITypes {
 		created_at: string;
 		completed: boolean;
 	};
+
+	/* HISTORY */
+
+	export type HistoryBase = {
+		id: number;
+		user_id: number;
+		created_at: string;
+	}
+
+	export type HistorySkill = HistoryBase & {
+		/* multiple events can happen at the same time, so it's important to have a timestamp */
+		type: 'level-up' | 'goal-complete' | 'goal-increment' | 'goal-decrement';
+		skill_id: number;
+		goal_id: number;
+		/* expect a goal id if the type is goal-complete, goal-increment, or goal-decrement 
+		 * also expect that xp and level are not 0 if the type is level up.
+		 */
+		xp: number; // experience gained (default 0)
+		level: number; // level gained (default 0)
+	}
+
+	export type HistoryProfile = HistoryBase & {
+		type: 'level-up' | 'xp-gain' | 'item-drop' | 'item-use';
+		xp: number; // experience gained (default 0)
+		level: number; // level gained (default 0)
+		/* expect a new item id if the type is item-drop or item-use */
+	}
 
 	/* UPDATE/REQUESTS */
 	export type SkillUpdate = {
@@ -182,6 +235,21 @@ export namespace API {
 		};
 	}
 
+	export async function loginWithGoogle(googleResponse: CredentialResponse): Promise<LoginState | APITypes.APIError> {
+		const r = await get<APITypes.LoginResponse>(`auth/login/google/web?code=${googleResponse.credential}`, {});
+		if ('error' in r) {
+			return r;
+		}
+		return {
+			null: false,
+			userid: r.user_id,
+			offline: false,
+			username: '',
+			accessToken: r.accessToken,
+			refreshToken: r.refreshToken,
+		};
+	}
+
 	export async function refresh(
 		headers: HeadersInit,
 	): Promise<APITypes.RefreshResponse | APITypes.APIError> {
@@ -227,7 +295,34 @@ export namespace API {
 			fn: AsyncFunction,
 			src: string = '',
 		): ReturnType<AsyncFunction> {
-			const fnc = { fn, id: APIQueue.genID() };
+
+			const fnc = {
+				fn: () => new Promise(async (resolve) => {
+					let errorful = false;
+					//set a timeout for 10 seconds
+					const t = setTimeout(() => {
+						//resolve forcefully with an error
+						errorful = true;
+						resolve({
+							error: 'timeout',
+							message: 'Request Timed Out',
+							code: 408
+						});
+						Log.log('api:request', 2, 'Request Timed Out', src);
+					}, 10000);
+					const r = await fn();
+					//resolve the promise as normal
+					clearTimeout(t);
+					if (errorful) {
+						return { error: 'timeout', message: 'Request Timed Out', code: 408 };
+					}
+					if (r == undefined) {
+						console.log('undefined response from %s', src);
+					}
+					resolve(r);
+				}) as Promise<any | APITypes.APIError>,
+				id: APIQueue.genID()
+			};
 
 			const promise = new Promise((resolve) => {
 				this.once('pop', async (data) => {
@@ -239,6 +334,7 @@ export namespace API {
 				});
 			});
 			this.queue(fnc);
+
 			//console.log('[queueAndWait] Queued %s from %s', fn, src);
 			return await promise;
 		}
@@ -264,6 +360,10 @@ namespace Offline {
 
 	export async function getLoginState(): Promise<LoginState> {
 		return new Promise(async (resolve) => {
+			if (!storage) {
+				Log.log('storage:request', 1, 'storage is not defined');
+				return resolve({ null: true, username: '', offline: true });
+			}
 			const arg = await storage.get('login');
 			const data = arg;
 			if (!data || Object.keys(data).length === 0) {
@@ -301,6 +401,7 @@ namespace Offline {
 					const json = data as any;
 					const npfp = new Profile(
 						json.name,
+						'', //username
 						json.level,
 						json.currentExperience,
 						[],
@@ -402,6 +503,60 @@ namespace Offline {
 	export async function saveProfileOffline(profile: object): Promise<void> {
 		storage.save('profile', profile);
 	}
+
+	/////////////
+	/* HISTORY */
+	/////////////
+
+	// history object
+	var history: OfflineHistory = undefined;
+
+	type OfflineHistory = {
+		profile: APITypes.HistoryProfile[];
+		skills: APITypes.HistorySkill[];
+	}
+
+	export async function getHistory(): Promise<OfflineHistory> {
+		if (!history) {
+			let historyObj = await storage.get('history');
+			if (!historyObj) {
+				historyObj = {
+					profile: [],
+					skills: [],
+				};
+			} else if (Object.keys(historyObj).length === 0) {
+				historyObj = {
+					profile: [],
+					skills: [],
+				};
+			}
+			history = historyObj as OfflineHistory;
+		}
+		return history as OfflineHistory;
+	}
+
+	export async function pushHistory<T extends keyof OfflineHistory, Z = T extends 'skills' ? APITypes.HistorySkill : APITypes.HistoryProfile>(type: T, data: Z) {
+		const history = await getHistory();
+		if (type === 'skills') {
+			history.skills.push(data as APITypes.HistorySkill);
+		} else {
+			history.profile.push(data as APITypes.HistoryProfile);
+		}
+		storage.save('history', history);
+	}
+
+	export async function clearSkillHistory() {
+		const history = await getHistory();
+		history.skills = [];
+		storage.save('history', history);
+	}
+
+	export async function clearSkillHistoryBySkillId(skill_id: number) {
+		const history = await getHistory();
+		history.skills = history.skills.filter((h) => h.skill_id !== skill_id);
+		storage.save('history', history);
+	}
+
 }
 
 type GetSkillProps = {
@@ -439,14 +594,11 @@ namespace Online {
 	}
 
 	/* PROFILE STUFF */
-	export async function getProfile(uid: string | number): Promise<APITypes.User> {
+	export async function getProfile(uid: string | number): Promise<APITypes.User | APITypes.APIError> {
 		const r = await API.get<APITypes.User>(
 			`protected/user/${uid}/profile`,
 			header(),
 		);
-		if ('error' in r) {
-			throw new Error(r.message);
-		}
 		return r;
 	}
 
@@ -460,6 +612,8 @@ namespace Online {
 		if (!profileobj.state) {
 			throw new Error('profile object is still undefined');
 		}
+		profileobj.state.changeId(user_obj.id);
+		profileobj.state.Username = user_obj.username;
 		profileobj.state.NameEventless = user_obj.name;
 		profileobj.state.Level = user_obj.level;
 		profileobj.state.CurrentExperience = user_obj.currentExperience;
@@ -576,6 +730,78 @@ namespace Online {
 		);
 	}
 
+	/* following stuff */
+
+	export async function followUser(uid: number) {
+		return await API.get<APITypes.FollowResponse | APITypes.APIError>(
+			`protected/user/${uid}/follow`,
+			header(),
+		);
+	}
+
+	export async function unfollowUser(uid: number) {
+		return await API.get<APITypes.FollowResponse | APITypes.APIError>(
+			`protected/user/${uid}/unfollow`,
+			header(),
+		);
+	}
+
+	export async function getFollowers(uid: number) {
+		return await API.get<APITypes.User[]>(
+			`protected/user/${uid}/followers`,
+			header(),
+		);
+	}
+
+	export async function getFollowing(uid: number) {
+		return await API.get<APITypes.User[]>(
+			`protected/user/${uid}/following`,
+			header(),
+		);
+	}
+
+	export async function isFollowing(uid: number) {
+		return await API.get<{ following: boolean } | APITypes.APIError>(
+			`protected/user/${uid}/isfollowing`,
+			header(),
+		);
+	}
+
+	//////////
+	/* FEED */
+	//////////
+
+	/**
+	 * @name getFeed
+	 * @description returns the feed of the current user
+	 */
+	export async function getFeed(uid: number) {
+		return await API.get<APITypes.FeedPost[]>(
+			`protected/user/${uid}/feed`,
+			header(),
+		);
+	}
+
+	/**
+	 * @name getPosts
+	 * @description returns the posts of the user
+	 * @param uid - the user id
+	 * @returns the posts of the user	
+	 */
+	export async function getPosts(uid: number) {
+		return await API.get<APITypes.FeedPost[]>(
+			`protected/user/${uid}/posts`,
+			header(),
+		);
+	}
+
+	/////////////
+	/* HISTORY */
+	/////////////
+
+	export async function getSkillHistory(skill_id: number, limit: number = 500, age: number = 0) {
+		return await API.get<APITypes.HistorySkill[]>(`protected/skill/${skill_id}/history?limit=${limit}&maxdate=${age}`, header());
+	}
 
 }
 
@@ -653,6 +879,7 @@ export namespace APIMethods {
 					name: skill.name,
 					level: skill.level,
 					currentExperience: skill.currentExperience,
+					hidden: skill.hidden,
 					goals: skill.goals.map((goal: APITypes.Goal) => ({
 						id: `${goal.id}`,
 						name: goal.name,
@@ -773,13 +1000,26 @@ export namespace APIMethods {
 		if (Authentication.getOfflineMode()) {
 			return f();
 		}
+		//wrap everything in a queue
+		await API.queueAndWait(async () => { }, 'refreshIfFailed');
 		//first lets try to get the data
 		const r = await f();
-		if ('error' in r && r.code === 401) {
+		if ('error' in r && r.code === 401 && r.error !== 'permission-denied') {
 			//lets try to refresh
-			const rr = await Authentication.refresh(false, 'refreshIfFailed');
+			let tries = 0;
+			let rr = await Authentication.refresh(false, 'refreshIfFailed');
+			//this is a bit of a hack, but try to refresh 3 times and see if it works - thanks a lot <ProtectedRoute />...
+			while (!rr && tries < 3) {
+				rr = await new Promise((resolve) => {
+					setTimeout(async () => {
+						resolve(await Authentication.refresh(false, 'refreshIfFailed'));
+					}, 500);
+				});
+				tries++;
+			}
 			if (rr) {
 				//lets try to get the data again
+				console.log('refreshed');
 				return await f();
 			}
 		} else {
@@ -845,13 +1085,134 @@ export namespace APIMethods {
 		return { ...apiResponse, profile: { ...oProfile.serialize(), skills } };
 	}
 
+	/* follow stuff */
+
+	export async function followUser(uid: number) {
+		if (Authentication.getOfflineMode()) {
+			return true;
+		}
+		return API.queueAndWait(() => Online.followUser(uid), 'followUser');
+	}
+
+	export async function unfollowUser(uid: number) {
+		if (Authentication.getOfflineMode()) {
+			return true;
+		}
+		return API.queueAndWait(() => Online.unfollowUser(uid), 'unfollowUser');
+	}
+
+	export async function isFollowing(uid: number) {
+		if (Authentication.getOfflineMode()) {
+			return false;
+		}
+		return await API.queueAndWait(() => Online.isFollowing(uid), 'isFollowing');
+	}
+
+	//get followers
+	export async function getFollowers(uid: number) {
+		if (Authentication.getOfflineMode()) {
+			return [];
+		}
+		return await API.queueAndWait(() => Online.getFollowers(uid), 'getFollowers');
+	}
+
+	//get following
+	export async function getFollowing(uid: number) {
+		if (Authentication.getOfflineMode()) {
+			return [];
+		}
+		return await API.queueAndWait(() => Online.getFollowing(uid), 'getFollowing');
+	}
+
+	//////////////
+	/* HISTORY */
+	/////////////
+
+	/**
+	 * @name getSkillHistory
+	 * @description returns the history of the skill
+	 * @param {number} skill_id - the skill id
+	 * @param {number} limit - the limit of the history
+	 * @param {number} maxDate - the maximum date of the history
+	 * @returns history of the skill
+	 */
+	export async function getSkillHistory(skill_id: number, limit: number = 1000, maxDate: number = 0) {
+		if (Authentication.getOfflineMode()) {
+			const date = maxDate > 0 ? Date.now() - maxDate * 1000 : 0;
+			const r = (await Offline.getHistory()).skills.filter((h) => h.skill_id === skill_id && new Date(h.created_at) > new Date(date)).reverse();
+			if (limit > 0) {
+				return r.slice(0, limit);
+			}
+			return r;
+		}
+		return await API.queueAndWait(() => Online.getSkillHistory(skill_id, limit, maxDate), 'getSkillHistory');
+	}
+
+	/**
+	 * @name pushSkillHistory
+	 * @description this pushes a history object into the skill's history
+	 * @warning this does not push to the server
+	 * @param {APITypes.HistorySkill} history - the history object
+	 */
+	export async function pushSkillHistory(history: APITypes.HistorySkill) {
+		if (Authentication.getOfflineMode()) {
+			await Offline.pushHistory('skills', history);
+		} else {
+
+			return;
+		}
+	}
+
+	/**
+	 * @name clearSkillHistory
+	 * @description clears the param's skill history
+	 * @param {number} skill_id - the skill id
+	 */
+	export async function clearSkillHistory(skill_id: number) {
+		if (Authentication.getOfflineMode()) {
+			await Offline.clearSkillHistoryBySkillId(skill_id);
+		} else {
+			return;
+		}
+	}
+
+
+	//////////
+	/* FEED */
+	//////////
+	//
+
+	/*
+	 * getFeed
+	 * returns the feed of the current user
+	 */
+	export async function getFeed(uid: number): Promise<{ posts: APITypes.FeedPost[] }> {
+		if (Authentication.getOfflineMode()) {
+			return { posts: [] };
+		}
+		return await API.queueAndWait(() => Online.getFeed(uid), 'getFeed');
+	}
+
+	/*
+	 * getPosts
+	 * returns the posts of the users
+	 * @param uid - the user user
+	 */
+	export async function getPosts(uid: number) {
+		if (Authentication.getOfflineMode()) {
+			return [];
+		}
+		return await API.queueAndWait(() => Online.getPosts(uid), 'getPosts');
+	}
+
+
+	/* migration stuff */
 	export async function migrate(uid: string | number, profile: ProfileProps & { skills: SkillProps[] }) {
 		if (Authentication.getOfflineMode()) {
 			return { error: 'offline-mode', message: 'Cannot migrate in offline mode' };
 		}
 		return await API.queueAndWait(() => Online.migrate(uid, profile), 'migrate');
 	}
-
 
 
 }
